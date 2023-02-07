@@ -120,6 +120,9 @@
 		05BD739A2992F43500CF4FD7 /* NSException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSException.h; sourceTree = "<group>"; };
 		05BD739B2992F43500CF4FD7 /* NSException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSException.m; sourceTree = "<group>"; };
 		05BD73AB2992F52000CF4FD7 /* NSError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSError.swift; sourceTree = "<group>"; };
+		05BD73AD2992FF3900CF4FD7 /* CODE_OF_CONDUCT.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = CODE_OF_CONDUCT.md; sourceTree = "<group>"; };
+		05BD73AE2992FF3900CF4FD7 /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		05BD73AF2992FF3900CF4FD7 /* README.md */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -151,6 +154,9 @@
 		05BD7278299275AB00CF4FD7 = {
 			isa = PBXGroup;
 			children = (
+				05BD73AD2992FF3900CF4FD7 /* CODE_OF_CONDUCT.md */,
+				05BD73AE2992FF3900CF4FD7 /* LICENSE */,
+				05BD73AF2992FF3900CF4FD7 /* README.md */,
 				05BD72BE299290A000CF4FD7 /* xcconfig */,
 				05BD7284299275AB00CF4FD7 /* SMCKit */,
 				05BD73812992D35900CF4FD7 /* smc-dump */,
@@ -605,6 +611,9 @@
 			baseConfigurationReference = 05BD72C3299290A000CF4FD7 /* Debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -617,6 +626,9 @@
 			baseConfigurationReference = 05BD72C4299290A000CF4FD7 /* Release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Manual;
+				DEVELOPMENT_TEAM = "";
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
