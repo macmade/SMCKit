@@ -14,7 +14,7 @@ SMCKit is a macOS framework providing read access to the SMC (System Management 
 
 ### smc-dump
 
-This project provides a command-line tool called `smc-dump`.  
+The project also provides a command-line tool called `smc-dump`.  
 It can be installed via Homebrew:
 
     brew install --HEAD macmade/tap/smc-dump
