@@ -15,7 +15,44 @@
 		05BD73202992AD0600CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73232992AF3F00CF4FD7 /* SMCHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73212992AF3F00CF4FD7 /* SMCHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73242992AF3F00CF4FD7 /* SMCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73222992AF3F00CF4FD7 /* SMCHelper.m */; };
+		05BD73732992D2E300CF4FD7 /* SMCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73182992AB7C00CF4FD7 /* SMCData.m */; };
+		05BD73742992D2E300CF4FD7 /* SMCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73222992AF3F00CF4FD7 /* SMCHelper.m */; };
+		05BD73752992D2E300CF4FD7 /* SMC.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD731B2992AD0600CF4FD7 /* SMC.m */; };
+		05BD73762992D2F900CF4FD7 /* SMCData.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73172992AB7C00CF4FD7 /* SMCData.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */; };
+		05BD73782992D2F900CF4FD7 /* SMCHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73212992AF3F00CF4FD7 /* SMCHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		05BD73792992D2F900CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD7285299275AB00CF4FD7 /* SMCKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		05BD73832992D35900CF4FD7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73822992D35900CF4FD7 /* main.swift */; };
+		05BD73882992D3B000CF4FD7 /* libSMC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD736A2992D23800CF4FD7 /* libSMC.a */; };
+		05BD738D2992EB4600CF4FD7 /* SMCDump.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD738C2992EB4600CF4FD7 /* SMCDump.swift */; };
+		05BD738F2992EF0B00CF4FD7 /* MachineDetails.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD738E2992EF0B00CF4FD7 /* MachineDetails.swift */; };
+		05BD73922992F27800CF4FD7 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73912992F27800CF4FD7 /* Task.swift */; };
+		05BD739C2992F43500CF4FD7 /* NSException.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD739B2992F43500CF4FD7 /* NSException.m */; };
+		05BD73AC2992F52000CF4FD7 /* NSError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73AB2992F52000CF4FD7 /* NSError.swift */; };
 /* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		05BD73892992D3B300CF4FD7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 05BD7279299275AB00CF4FD7 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 05BD73692992D23800CF4FD7;
+			remoteInfo = SMC;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		05BD737E2992D35900CF4FD7 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		05BD7282299275AB00CF4FD7 /* SMCKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SMCKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -73,6 +110,16 @@
 		05BD731D2992AD0600CF4FD7 /* SMC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMC.h; sourceTree = "<group>"; };
 		05BD73212992AF3F00CF4FD7 /* SMCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCHelper.h; sourceTree = "<group>"; };
 		05BD73222992AF3F00CF4FD7 /* SMCHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCHelper.m; sourceTree = "<group>"; };
+		05BD736A2992D23800CF4FD7 /* libSMC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSMC.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		05BD73802992D35900CF4FD7 /* smc-dump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "smc-dump"; sourceTree = BUILT_PRODUCTS_DIR; };
+		05BD73822992D35900CF4FD7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
+		05BD738B2992D43700CF4FD7 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		05BD738C2992EB4600CF4FD7 /* SMCDump.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCDump.swift; sourceTree = "<group>"; };
+		05BD738E2992EF0B00CF4FD7 /* MachineDetails.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MachineDetails.swift; sourceTree = "<group>"; };
+		05BD73912992F27800CF4FD7 /* Task.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Task.swift; sourceTree = "<group>"; };
+		05BD739A2992F43500CF4FD7 /* NSException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSException.h; sourceTree = "<group>"; };
+		05BD739B2992F43500CF4FD7 /* NSException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSException.m; sourceTree = "<group>"; };
+		05BD73AB2992F52000CF4FD7 /* NSError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSError.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -80,6 +127,21 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		05BD73682992D23800CF4FD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		05BD737D2992D35900CF4FD7 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05BD73882992D3B000CF4FD7 /* libSMC.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -91,7 +153,9 @@
 			children = (
 				05BD72BE299290A000CF4FD7 /* xcconfig */,
 				05BD7284299275AB00CF4FD7 /* SMCKit */,
+				05BD73812992D35900CF4FD7 /* smc-dump */,
 				05BD7283299275AB00CF4FD7 /* Products */,
+				05BD73872992D3AF00CF4FD7 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -99,6 +163,8 @@
 			isa = PBXGroup;
 			children = (
 				05BD7282299275AB00CF4FD7 /* SMCKit.framework */,
+				05BD736A2992D23800CF4FD7 /* libSMC.a */,
+				05BD73802992D35900CF4FD7 /* smc-dump */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -244,6 +310,28 @@
 			path = .github;
 			sourceTree = "<group>";
 		};
+		05BD73812992D35900CF4FD7 /* smc-dump */ = {
+			isa = PBXGroup;
+			children = (
+				05BD73822992D35900CF4FD7 /* main.swift */,
+				05BD738C2992EB4600CF4FD7 /* SMCDump.swift */,
+				05BD738E2992EF0B00CF4FD7 /* MachineDetails.swift */,
+				05BD73912992F27800CF4FD7 /* Task.swift */,
+				05BD739A2992F43500CF4FD7 /* NSException.h */,
+				05BD739B2992F43500CF4FD7 /* NSException.m */,
+				05BD73AB2992F52000CF4FD7 /* NSError.swift */,
+				05BD738B2992D43700CF4FD7 /* Bridging-Header.h */,
+			);
+			path = "smc-dump";
+			sourceTree = "<group>";
+		};
+		05BD73872992D3AF00CF4FD7 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -256,6 +344,18 @@
 				05BD731F2992AD0600CF4FD7 /* SMC-Internal.h in Headers */,
 				05BD73202992AD0600CF4FD7 /* SMC.h in Headers */,
 				05BD7286299275AB00CF4FD7 /* SMCKit.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		05BD73662992D23800CF4FD7 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05BD73762992D2F900CF4FD7 /* SMCData.h in Headers */,
+				05BD73782992D2F900CF4FD7 /* SMCHelper.h in Headers */,
+				05BD73792992D2F900CF4FD7 /* SMC.h in Headers */,
+				05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */,
+				05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -280,6 +380,41 @@
 			productReference = 05BD7282299275AB00CF4FD7 /* SMCKit.framework */;
 			productType = "com.apple.product-type.framework";
 		};
+		05BD73692992D23800CF4FD7 /* SMC */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 05BD73722992D23800CF4FD7 /* Build configuration list for PBXNativeTarget "SMC" */;
+			buildPhases = (
+				05BD73662992D23800CF4FD7 /* Headers */,
+				05BD73672992D23800CF4FD7 /* Sources */,
+				05BD73682992D23800CF4FD7 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SMC;
+			productName = SMC;
+			productReference = 05BD736A2992D23800CF4FD7 /* libSMC.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		05BD737F2992D35900CF4FD7 /* smc-dump */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 05BD73842992D35900CF4FD7 /* Build configuration list for PBXNativeTarget "smc-dump" */;
+			buildPhases = (
+				05BD737C2992D35900CF4FD7 /* Sources */,
+				05BD737D2992D35900CF4FD7 /* Frameworks */,
+				05BD737E2992D35900CF4FD7 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				05BD738A2992D3B300CF4FD7 /* PBXTargetDependency */,
+			);
+			name = "smc-dump";
+			productName = "smc-dump";
+			productReference = 05BD73802992D35900CF4FD7 /* smc-dump */;
+			productType = "com.apple.product-type.tool";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -287,11 +422,18 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1420;
 				LastUpgradeCheck = 1420;
 				TargetAttributes = {
 					05BD7281299275AB00CF4FD7 = {
 						CreatedOnToolsVersion = 14.2;
 						LastSwiftMigration = 1420;
+					};
+					05BD73692992D23800CF4FD7 = {
+						CreatedOnToolsVersion = 14.2;
+					};
+					05BD737F2992D35900CF4FD7 = {
+						CreatedOnToolsVersion = 14.2;
 					};
 				};
 			};
@@ -309,6 +451,8 @@
 			projectRoot = "";
 			targets = (
 				05BD7281299275AB00CF4FD7 /* SMCKit */,
+				05BD73692992D23800CF4FD7 /* SMC */,
+				05BD737F2992D35900CF4FD7 /* smc-dump */,
 			);
 		};
 /* End PBXProject section */
@@ -334,16 +478,50 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		05BD73672992D23800CF4FD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05BD73752992D2E300CF4FD7 /* SMC.m in Sources */,
+				05BD73732992D2E300CF4FD7 /* SMCData.m in Sources */,
+				05BD73742992D2E300CF4FD7 /* SMCHelper.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		05BD737C2992D35900CF4FD7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05BD73922992F27800CF4FD7 /* Task.swift in Sources */,
+				05BD738F2992EF0B00CF4FD7 /* MachineDetails.swift in Sources */,
+				05BD739C2992F43500CF4FD7 /* NSException.m in Sources */,
+				05BD73832992D35900CF4FD7 /* main.swift in Sources */,
+				05BD738D2992EB4600CF4FD7 /* SMCDump.swift in Sources */,
+				05BD73AC2992F52000CF4FD7 /* NSError.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		05BD738A2992D3B300CF4FD7 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 05BD73692992D23800CF4FD7 /* SMC */;
+			targetProxy = 05BD73892992D3B300CF4FD7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		05BD7287299275AB00CF4FD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 05BD72EE299290A000CF4FD7 /* Debug - Library.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_CODE_COVERAGE = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 326Y53CJMD;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 			};
 			name = Debug;
 		};
@@ -351,9 +529,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 05BD72C6299290A000CF4FD7 /* Release - Library.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_CODE_COVERAGE = NO;
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = 326Y53CJMD;
-				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
+				MACOSX_DEPLOYMENT_TARGET = 10.15;
 			};
 			name = Release;
 		};
@@ -401,6 +582,48 @@
 			};
 			name = Release;
 		};
+		05BD73702992D23800CF4FD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+			};
+			name = Debug;
+		};
+		05BD73712992D23800CF4FD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+			};
+			name = Release;
+		};
+		05BD73852992D35900CF4FD7 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05BD72C3299290A000CF4FD7 /* Debug.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_CODE_COVERAGE = NO;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "smc-dump/Bridging-Header.h";
+			};
+			name = Debug;
+		};
+		05BD73862992D35900CF4FD7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05BD72C4299290A000CF4FD7 /* Release.xcconfig */;
+			buildSettings = {
+				CLANG_ENABLE_CODE_COVERAGE = NO;
+				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
+				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_OBJC_BRIDGING_HEADER = "smc-dump/Bridging-Header.h";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -418,6 +641,24 @@
 			buildConfigurations = (
 				05BD728A299275AB00CF4FD7 /* Debug */,
 				05BD728B299275AB00CF4FD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		05BD73722992D23800CF4FD7 /* Build configuration list for PBXNativeTarget "SMC" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				05BD73702992D23800CF4FD7 /* Debug */,
+				05BD73712992D23800CF4FD7 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		05BD73842992D35900CF4FD7 /* Build configuration list for PBXNativeTarget "smc-dump" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				05BD73852992D35900CF4FD7 /* Debug */,
+				05BD73862992D35900CF4FD7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

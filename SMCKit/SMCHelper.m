@@ -208,12 +208,32 @@
     return [ [ NSString alloc ] initWithData: reversed encoding: NSUTF8StringEncoding ];
 }
 
++ ( nullable NSString * )printableStringWithData: ( NSData * )data
+{
+    NSData * reversed = [ self reversedData: data ];
+
+    if( reversed == nil )
+    {
+        return nil;
+    }
+
+    NSMutableString * str   = [ NSMutableString new ];
+    const char      * bytes = reversed.bytes;
+
+    for( NSUInteger i = 0; i < data.length; i++ )
+    {
+        [ str appendFormat: @"%c", ( isprint( bytes[ i ] ) ? bytes[ i ] : '.' ) ];
+    }
+
+    return str;
+}
+
 + ( nullable id )valueForData: ( NSData * )data type: ( uint32_t )type
 {
     #pragma clang diagnostic push
     #pragma clang diagnostic ignored "-Wfour-char-constants"
 
-    switch( type)
+    switch( type )
     {
         case 'si8 ': return [ NSNumber numberWithChar:     [ self int8:  data ] ];
         case 'si16': return [ NSNumber numberWithShort:    [ self int16: data ] ];

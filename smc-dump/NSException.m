@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2022, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -22,39 +22,33 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import <Foundation/Foundation.h>
+#import "NSException.h"
+#import "smc_dump-Swift.h"
 
-NS_ASSUME_NONNULL_BEGIN
+@implementation NSException( SMCDump )
 
-@interface SMCHelper: NSObject
++ ( BOOL )doTry: ( void ( ^ )( void ) )block error: ( NSError * __autoreleasing * )error
+{
+    if( block == NULL )
+    {
+        return YES;
+    }
 
-- ( instancetype )init NS_UNAVAILABLE;
+    @try
+    {
+        block();
 
-+ ( NSString * )fourCCString: ( uint32_t )value;
-+ ( uint32_t )fourCC: ( NSString * )value;
+        return YES;
+    }
+    @catch( NSException * e )
+    {
+        if( error != NULL )
+        {
+            *( error ) = [ [ NSError alloc ] initWithException: e ];
+        }
 
-+ ( int8_t  )int8:  ( NSData * )data;
-+ ( int16_t )int16: ( NSData * )data;
-+ ( int32_t )int32: ( NSData * )data;
-+ ( int64_t )int64: ( NSData * )data;
-
-+ ( uint8_t  )uint8:  ( NSData * )data;
-+ ( uint16_t )uint16: ( NSData * )data;
-+ ( uint32_t )uint32: ( NSData * )data;
-+ ( uint64_t )uint64: ( NSData * )data;
-
-+ ( float  )float32: ( NSData * )data;
-+ ( double )float64: ( NSData * )data;
-+ ( double )ioFloat: ( NSData * )data;
-+ ( double )sp78:    ( NSData * )data;
-
-+ ( nullable NSData * )reversedData: ( NSData * )data;
-+ ( nullable NSString * )stringWithData: ( NSData * )data;
-+ ( nullable NSString * )printableStringWithData: ( NSData * )data;
-+ ( nullable id )valueForData: ( NSData * )data type: ( uint32_t )type;
-
-+ ( NSError * )errorWithTitle: ( NSString * )title message: ( NSString * )message code: ( NSInteger )code;
+        return NO;
+    }
+}
 
 @end
-
-NS_ASSUME_NONNULL_END
