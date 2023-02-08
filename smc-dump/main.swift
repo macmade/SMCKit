@@ -25,4 +25,4 @@
 import Foundation
 import SMC
 
-print( SMCDump().produce() )
+print( SMCDump.produce() )

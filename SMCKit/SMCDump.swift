@@ -27,26 +27,23 @@ import Foundation
 @objc
 public class SMCDump: NSObject
 {
-    private var data: [ SMCData ]
+    private override init()
+    {}
 
     @objc
-    public override init()
+    public class func produce() -> String
     {
-        self.data = SMC.shared.readAllKeys().sorted
+        let data = SMC.shared.readAllKeys().sorted
         {
             $0.keyName.localizedCaseInsensitiveCompare( $1.keyName ) == .orderedAscending
         }
-    }
 
-    @objc
-    public func produce() -> String
-    {
-        if self.data.isEmpty
+        if data.isEmpty
         {
             return ""
         }
 
-        let descriptions = self.data.map
+        let descriptions = data.map
         {
             self.description( for: $0 )
         }
@@ -58,7 +55,7 @@ public class SMCDump: NSObject
         let l5 = descriptions.reduce( 0 ) { max( $0, $1.4.count ) }
 
         let separator = "".padding( toLength: l1 + l2 + l3 + l4 + l5 + 16, withPad: "#", startingAt: 0 )
-        let header    = self.header.map { "# \( $0 )" }.joined( separator: "\n" )
+        let header    = self.header().map { "# \( $0 )" }.joined( separator: "\n" )
         let lines     = descriptions.map
         {
             let s1 = $0.0.padding( toLength: l1, withPad: " ", startingAt: 0 )
@@ -74,7 +71,7 @@ public class SMCDump: NSObject
         return "\( separator )\n\( header )\n\( separator )\n\( lines )"
     }
 
-    private func description( for data: SMCData ) -> ( String, String, String, String, String )
+    private class func description( for data: SMCData ) -> ( String, String, String, String, String )
     {
         (
             data.keyName,
@@ -85,7 +82,7 @@ public class SMCDump: NSObject
         )
     }
 
-    private func valueDescription( for data: SMCData ) -> String
+    private class func valueDescription( for data: SMCData ) -> String
     {
         switch data.typeName
         {
@@ -111,7 +108,7 @@ public class SMCDump: NSObject
         }
     }
 
-    private func dataDescription( for data: SMCData ) -> String
+    private class func dataDescription( for data: SMCData ) -> String
     {
         var string = ""
 
@@ -123,7 +120,7 @@ public class SMCDump: NSObject
         return string
     }
 
-    private func dataLengthDescription( for data: SMCData ) -> String
+    private class func dataLengthDescription( for data: SMCData ) -> String
     {
         if data.data.count == 1
         {
@@ -133,7 +130,7 @@ public class SMCDump: NSObject
         return "\( data.data.count ) bytes"
     }
 
-    private var header: [ String ]
+    private class func header() -> [ String ]
     {
         [
             [ "smc-dump" ],
@@ -146,7 +143,7 @@ public class SMCDump: NSObject
         }
     }
 
-    private func headerParts() -> [ String ]
+    private class func headerParts() -> [ String ]
     {
         let all = MachineDetails.all
         let l1  = all.reduce( 0 ) { max( $0, $1.0.count ) }
