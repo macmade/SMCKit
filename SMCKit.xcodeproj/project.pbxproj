@@ -57,6 +57,9 @@
 /* Begin PBXFileReference section */
 		058B8DF7299418E900263FE9 /* SMCException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMCException.h; sourceTree = "<group>"; };
 		058B8DF8299418E900263FE9 /* SMCException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMCException.m; sourceTree = "<group>"; };
+		058B8DFC29941D5F00263FE9 /* LICENSE */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE; sourceTree = "<group>"; };
+		058B8DFD29941D5F00263FE9 /* CODE_OF_CONDUCT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CODE_OF_CONDUCT.md; sourceTree = "<group>"; };
+		058B8DFE29941D5F00263FE9 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		05BD7282299275AB00CF4FD7 /* SMCKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SMCKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		05BD7285299275AB00CF4FD7 /* SMCKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMCKit.h; sourceTree = "<group>"; };
 		05BD72BF299290A000CF4FD7 /* CODE_OF_CONDUCT.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CODE_OF_CONDUCT.md; sourceTree = "<group>"; };
@@ -149,6 +152,9 @@
 		05BD7278299275AB00CF4FD7 = {
 			isa = PBXGroup;
 			children = (
+				058B8DFD29941D5F00263FE9 /* CODE_OF_CONDUCT.md */,
+				058B8DFC29941D5F00263FE9 /* LICENSE */,
+				058B8DFE29941D5F00263FE9 /* README.md */,
 				05BD72BE299290A000CF4FD7 /* xcconfig */,
 				05BD7284299275AB00CF4FD7 /* SMCKit */,
 				05BD73812992D35900CF4FD7 /* smc-dump */,
