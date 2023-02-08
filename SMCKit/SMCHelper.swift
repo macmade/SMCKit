@@ -46,12 +46,12 @@ public class SMCHelper: NSObject
     {
         switch self.fourCC( value: type )
         {
-            case "si8 ": return self.int8(  data: data ).byteSwapped
+            case "si8 ": return self.int8(  data: data )
             case "si16": return self.int16( data: data ).byteSwapped
             case "si32": return self.int32( data: data ).byteSwapped
             case "si64": return self.int64( data: data ).byteSwapped
 
-            case "ui8 ": return self.uint8(  data: data ).byteSwapped
+            case "ui8 ": return self.uint8(  data: data )
             case "ui16": return self.uint16( data: data ).byteSwapped
             case "ui32": return self.uint32( data: data ).byteSwapped
             case "ui64": return self.uint64( data: data ).byteSwapped
