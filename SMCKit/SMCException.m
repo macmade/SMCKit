@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2022, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -22,23 +22,38 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-import Cocoa
+#import "SMCException.h"
 
-@objc
-public extension NSError
+#ifdef SMC_STATIC
+#import "SMC-Swift.h"
+#else
+#import <SMCKit/SMCKit-Swift.h>
+#endif
+
+@implementation SMCException
+
++ ( BOOL )doTry: ( void ( ^ )( void ) )block error: ( NSError * __autoreleasing * )error
 {
-    convenience init( exception: NSException )
+    if( block == NULL )
     {
-        var info: [ String: Any ] =
-            [
-                NSLocalizedDescriptionKey: exception.name,
-            ]
+        return YES;
+    }
 
-        if let reason = exception.reason
+    @try
+    {
+        block();
+
+        return YES;
+    }
+    @catch( NSException * e )
+    {
+        if( error != NULL )
         {
-            info[ NSLocalizedRecoverySuggestionErrorKey ] = reason
+            *( error ) = [ SMCHelper errorWithException: e ];
         }
 
-        self.init( domain: NSCocoaErrorDomain, code: 0, userInfo: info )
+        return NO;
     }
 }
+
+@end

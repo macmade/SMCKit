@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2022, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -22,11 +22,13 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import <Cocoa/Cocoa.h>
+#import <Foundation/Foundation.h>
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface NSException( SMCDump )
+@interface SMCException: NSObject
+
+- ( instancetype )init NS_UNAVAILABLE;
 
 + ( BOOL )doTry: ( void ( ^ )( void ) )block error: ( NSError * __autoreleasing * )error;
 

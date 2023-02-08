@@ -23,13 +23,14 @@
  ******************************************************************************/
 
 import Foundation
-import SMC
 
-public class SMCDump
+@objc
+public class SMCDump: NSObject
 {
     private var data: [ SMCData ]
 
-    public init()
+    @objc
+    public override init()
     {
         self.data = SMC.shared.readAllKeys().sorted
         {
@@ -37,7 +38,8 @@ public class SMCDump
         }
     }
 
-    public var description: String
+    @objc
+    public func produce() -> String
     {
         if self.data.isEmpty
         {
@@ -87,10 +89,10 @@ public class SMCDump
     {
         switch data.typeName
         {
-            case "si8 ": return "\( data.value as? Int8   ?? 0 )"
-            case "si16": return "\( data.value as? Int16  ?? 0 )"
-            case "si32": return "\( data.value as? Int32  ?? 0 )"
-            case "si64": return "\( data.value as? Int64  ?? 0 )"
+            case "si8 ": return "\( data.value as? Int8  ?? 0 )"
+            case "si16": return "\( data.value as? Int16 ?? 0 )"
+            case "si32": return "\( data.value as? Int32 ?? 0 )"
+            case "si64": return "\( data.value as? Int64 ?? 0 )"
 
             case "ui8 ": return "\( data.value as? UInt8  ?? 0 )"
             case "ui16": return "\( data.value as? UInt16 ?? 0 )"
@@ -103,7 +105,7 @@ public class SMCDump
 
             case "flag": return ( data.value as? Bool ?? false ) ? "True" : "False"
 
-            case "ch8*": return SMCHelper.printableString( data: data.data )
+            case "ch8*": return SMCHelper.printableString( data: data.data ) ?? ""
 
             default:     return ""
         }

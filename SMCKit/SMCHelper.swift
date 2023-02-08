@@ -204,13 +204,32 @@ public class SMCHelper: NSObject
     @objc( string: )
     public class func string( data: Data ) -> String?
     {
-        String( data: Data( data.reversed() ), encoding: .utf8 )
+        guard data.count > 0
+        else
+        {
+            return nil
+        }
+
+        return String( data: Data( data.reversed() ), encoding: .utf8 )
     }
 
     @objc( printableString: )
-    public class func printableString( data: Data ) -> String
+    public class func printableString( data: Data ) -> String?
     {
-        String( cString: data.reversed().map { isprint( Int32( $0 ) ) == 0 ? 46 : $0 } )
+        var characters = data.reversed().map { isprint( Int32( $0 ) ) == 0 ? 46 : $0 }
+
+        guard let last = characters.last
+        else
+        {
+            return nil
+        }
+
+        if last != 0
+        {
+            characters.append( 0 )
+        }
+
+        return String( cString: characters )
     }
 
     @objc
@@ -219,5 +238,18 @@ public class SMCHelper: NSObject
         let info = [ NSLocalizedDescriptionKey: title, NSLocalizedRecoverySuggestionErrorKey: message ]
 
         return NSError( domain: NSCocoaErrorDomain, code: code, userInfo: info )
+    }
+
+    @objc
+    public class func error( exception: NSException ) -> NSError
+    {
+        var info: [ String: Any ] = [ NSLocalizedDescriptionKey: exception.name ]
+
+        if let reason = exception.reason
+        {
+            info[ NSLocalizedRecoverySuggestionErrorKey ] = reason
+        }
+
+        return NSError( domain: NSCocoaErrorDomain, code: 0, userInfo: info )
     }
 }

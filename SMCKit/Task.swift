@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2022, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -24,7 +24,7 @@
 
 import Foundation
 
-public class Task
+internal class Task
 {
     private var task:    Process
     private var pipeOut: Pipe
@@ -40,7 +40,7 @@ public class Task
 
         do
         {
-            try NSException.doTry
+            try SMCException.doTry
             {
                 task.run( input: input )
             }
