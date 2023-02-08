@@ -115,7 +115,23 @@ internal class MachineDetails
 
             return ( label, value )
         }
+        .filter
+        {
+            self.validHardwareDetailsKeys.contains( $0.0 )
+        }
 
         return details.isEmpty ? nil : details
+    }
+
+    private static var validHardwareDetailsKeys: [ String ]
+    {
+        [
+            "Model Name",
+            "Model Identifier",
+            "Model Number",
+            "Chip",
+            "Total Number of Cores",
+            "Memory",
+        ]
     }
 }
