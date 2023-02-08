@@ -21,9 +21,6 @@
 		05BD731F2992AD0600CF4FD7 /* SMC-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */; };
 		05BD73202992AD0600CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73752992D2E300CF4FD7 /* SMC.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD731B2992AD0600CF4FD7 /* SMC.m */; };
-		05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */; };
-		05BD73792992D2F900CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD7285299275AB00CF4FD7 /* SMCKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73832992D35900CF4FD7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73822992D35900CF4FD7 /* main.swift */; };
 		05BD73882992D3B000CF4FD7 /* libSMC.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD736A2992D23800CF4FD7 /* libSMC.a */; };
 		05BD746F299404CD00CF4FD7 /* SMCData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD746E299404CD00CF4FD7 /* SMCData.swift */; };
@@ -352,9 +349,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05BD73792992D2F900CF4FD7 /* SMC.h in Headers */,
-				05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */,
-				05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -609,7 +603,8 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "SMCKit/Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -631,7 +626,8 @@
 					"@loader_path/../Frameworks",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+				SKIP_INSTALL = YES;
+				STRIP_INSTALLED_PRODUCT = NO;
 				SWIFT_OBJC_BRIDGING_HEADER = "SMCKit/Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 			};
@@ -644,6 +640,7 @@
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Debug;
 		};
@@ -654,6 +651,7 @@
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
 				GCC_INSTRUMENT_PROGRAM_FLOW_ARCS = NO;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
 			};
 			name = Release;
 		};
