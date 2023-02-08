@@ -22,6 +22,4 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import <SMCKit/SMCHelper.h>
-#import <SMCKit/SMCData.h>
 #import <SMCKit/SMC.h>

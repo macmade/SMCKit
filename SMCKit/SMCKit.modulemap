@@ -22,39 +22,9 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import <Foundation/Foundation.h>
+framework module SMCKit
+{
+    umbrella header "SMCKit.h"
 
-NS_ASSUME_NONNULL_BEGIN
-
-@interface SMCHelper: NSObject
-
-- ( instancetype )init NS_UNAVAILABLE;
-
-+ ( NSString * )fourCCString: ( uint32_t )value;
-+ ( uint32_t )fourCC: ( NSString * )value;
-
-+ ( int8_t  )int8:  ( NSData * )data;
-+ ( int16_t )int16: ( NSData * )data;
-+ ( int32_t )int32: ( NSData * )data;
-+ ( int64_t )int64: ( NSData * )data;
-
-+ ( uint8_t  )uint8:  ( NSData * )data;
-+ ( uint16_t )uint16: ( NSData * )data;
-+ ( uint32_t )uint32: ( NSData * )data;
-+ ( uint64_t )uint64: ( NSData * )data;
-
-+ ( float  )float32: ( NSData * )data;
-+ ( double )float64: ( NSData * )data;
-+ ( double )ioFloat: ( NSData * )data;
-+ ( double )sp78:    ( NSData * )data;
-
-+ ( nullable NSData * )reversedData: ( NSData * )data;
-+ ( nullable NSString * )stringWithData: ( NSData * )data;
-+ ( nullable NSString * )printableStringWithData: ( NSData * )data;
-+ ( nullable id )valueForData: ( NSData * )data type: ( uint32_t )type;
-
-+ ( NSError * )errorWithTitle: ( NSString * )title message: ( NSString * )message code: ( NSInteger )code;
-
-@end
-
-NS_ASSUME_NONNULL_END
+    export *
+}

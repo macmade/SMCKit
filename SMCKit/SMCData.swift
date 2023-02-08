@@ -22,22 +22,26 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import <Foundation/Foundation.h>
+import Foundation
 
-NS_ASSUME_NONNULL_BEGIN
+@objc
+public class SMCData: NSObject
+{
+    @objc public private( set ) dynamic var key:      UInt32
+    @objc public private( set ) dynamic var type:     UInt32
+    @objc public private( set ) dynamic var data:     Data
+    @objc public private( set ) dynamic var keyName:  String
+    @objc public private( set ) dynamic var typeName: String
+    @objc public private( set ) dynamic var value:    Any?
 
-@interface SMCData: NSObject
-
-@property( nonatomic, readonly           ) uint32_t   key;
-@property( nonatomic, readonly           ) uint32_t   type;
-@property( nonatomic, readonly           ) NSData   * data;
-@property( nonatomic, readonly           ) NSString * keyName;
-@property( nonatomic, readonly           ) NSString * typeName;
-@property( nonatomic, readonly, nullable ) id         value;
-
-- ( instancetype )init NS_UNAVAILABLE;
-- ( instancetype )initWithKey: ( uint32_t )key type: ( uint32_t )type data: ( NSData * )data NS_DESIGNATED_INITIALIZER;
-
-@end
-
-NS_ASSUME_NONNULL_END
+    @objc
+    public init( key: UInt32, type: UInt32, data: Data )
+    {
+        self.key      = key
+        self.type     = type
+        self.data     = data
+        self.keyName  = SMCHelper.fourCC( value: key )
+        self.typeName = SMCHelper.fourCC( value: type )
+        self.value    = SMCHelper.value( for: data, type: type )
+    }
+}

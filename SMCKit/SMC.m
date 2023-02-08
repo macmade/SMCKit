@@ -23,9 +23,13 @@
  ******************************************************************************/
 
 #import "SMC.h"
-#import "SMCData.h"
-#import "SMCHelper.h"
 #import "SMC-Internal.h"
+
+#ifdef SMC_STATIC
+#import "SMC-Swift.h"
+#else
+#import <SMCKit/SMCKit-Swift.h>
+#endif
 
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfour-char-constants"

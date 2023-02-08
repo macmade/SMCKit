@@ -22,39 +22,3 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
-#import "SMCData.h"
-#import "SMCHelper.h"
-
-NS_ASSUME_NONNULL_BEGIN
-
-@interface SMCData()
-
-@property( nonatomic, readwrite, assign           ) uint32_t   key;
-@property( nonatomic, readwrite, assign           ) uint32_t   type;
-@property( nonatomic, readwrite, strong           ) NSData   * data;
-@property( nonatomic, readwrite, strong           ) NSString * keyName;
-@property( nonatomic, readwrite, strong           ) NSString * typeName;
-@property( nonatomic, readwrite, strong, nullable ) id         value;
-
-@end
-
-NS_ASSUME_NONNULL_END
-
-@implementation SMCData
-
-- ( instancetype )initWithKey: ( uint32_t )key type: ( uint32_t )type data: ( NSData * )data
-{
-    if( ( self = [ super init ] ) )
-    {
-        self.key      = key;
-        self.type     = type;
-        self.data     = data;
-        self.keyName  = [ SMCHelper fourCCString: key ];
-        self.typeName = [ SMCHelper fourCCString: type ];
-        self.value    = [ SMCHelper valueForData: data type: type ];
-    }
-
-    return self;
-}
-
-@end

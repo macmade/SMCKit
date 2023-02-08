@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2022, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -23,6 +23,7 @@
  ******************************************************************************/
 
 import Foundation
+import SMC
 
 public class SMCDump
 {
@@ -102,7 +103,7 @@ public class SMCDump
 
             case "flag": return ( data.value as? Bool ?? false ) ? "True" : "False"
 
-            case "ch8*": return SMCHelper.printableString( with: data.data ) ?? ""
+            case "ch8*": return SMCHelper.printableString( data: data.data )
 
             default:     return ""
         }

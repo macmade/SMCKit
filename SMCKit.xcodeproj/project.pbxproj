@@ -8,19 +8,11 @@
 
 /* Begin PBXBuildFile section */
 		05BD7286299275AB00CF4FD7 /* SMCKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD7285299275AB00CF4FD7 /* SMCKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05BD73192992AB7C00CF4FD7 /* SMCData.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73172992AB7C00CF4FD7 /* SMCData.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05BD731A2992AB7C00CF4FD7 /* SMCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73182992AB7C00CF4FD7 /* SMCData.m */; };
 		05BD731E2992AD0600CF4FD7 /* SMC.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD731B2992AD0600CF4FD7 /* SMC.m */; };
 		05BD731F2992AD0600CF4FD7 /* SMC-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */; };
 		05BD73202992AD0600CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05BD73232992AF3F00CF4FD7 /* SMCHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73212992AF3F00CF4FD7 /* SMCHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		05BD73242992AF3F00CF4FD7 /* SMCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73222992AF3F00CF4FD7 /* SMCHelper.m */; };
-		05BD73732992D2E300CF4FD7 /* SMCData.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73182992AB7C00CF4FD7 /* SMCData.m */; };
-		05BD73742992D2E300CF4FD7 /* SMCHelper.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73222992AF3F00CF4FD7 /* SMCHelper.m */; };
 		05BD73752992D2E300CF4FD7 /* SMC.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD731B2992AD0600CF4FD7 /* SMC.m */; };
-		05BD73762992D2F900CF4FD7 /* SMCData.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73172992AB7C00CF4FD7 /* SMCData.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */; };
-		05BD73782992D2F900CF4FD7 /* SMCHelper.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD73212992AF3F00CF4FD7 /* SMCHelper.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73792992D2F900CF4FD7 /* SMC.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD731D2992AD0600CF4FD7 /* SMC.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 05BD7285299275AB00CF4FD7 /* SMCKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		05BD73832992D35900CF4FD7 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73822992D35900CF4FD7 /* main.swift */; };
@@ -30,6 +22,10 @@
 		05BD73922992F27800CF4FD7 /* Task.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73912992F27800CF4FD7 /* Task.swift */; };
 		05BD739C2992F43500CF4FD7 /* NSException.m in Sources */ = {isa = PBXBuildFile; fileRef = 05BD739B2992F43500CF4FD7 /* NSException.m */; };
 		05BD73AC2992F52000CF4FD7 /* NSError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD73AB2992F52000CF4FD7 /* NSError.swift */; };
+		05BD746F299404CD00CF4FD7 /* SMCData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD746E299404CD00CF4FD7 /* SMCData.swift */; };
+		05BD7470299404CD00CF4FD7 /* SMCData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD746E299404CD00CF4FD7 /* SMCData.swift */; };
+		05BD7474299408E200CF4FD7 /* SMCHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD7473299408E200CF4FD7 /* SMCHelper.swift */; };
+		05BD7475299408E200CF4FD7 /* SMCHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD7473299408E200CF4FD7 /* SMCHelper.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -103,13 +99,9 @@
 		05BD72F2299290A000CF4FD7 /* ccache.sh */ = {isa = PBXFileReference; lastKnownFileType = text.script.sh; path = ccache.sh; sourceTree = "<group>"; };
 		05BD72F4299290A000CF4FD7 /* FUNDING.yml */ = {isa = PBXFileReference; lastKnownFileType = text.yaml; path = FUNDING.yml; sourceTree = "<group>"; };
 		05BD72F5299290A000CF4FD7 /* Debug - zld.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = "Debug - zld.xcconfig"; sourceTree = "<group>"; };
-		05BD73172992AB7C00CF4FD7 /* SMCData.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SMCData.h; sourceTree = "<group>"; };
-		05BD73182992AB7C00CF4FD7 /* SMCData.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SMCData.m; sourceTree = "<group>"; };
 		05BD731B2992AD0600CF4FD7 /* SMC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMC.m; sourceTree = "<group>"; };
 		05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "SMC-Internal.h"; sourceTree = "<group>"; };
 		05BD731D2992AD0600CF4FD7 /* SMC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMC.h; sourceTree = "<group>"; };
-		05BD73212992AF3F00CF4FD7 /* SMCHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = SMCHelper.h; sourceTree = "<group>"; };
-		05BD73222992AF3F00CF4FD7 /* SMCHelper.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = SMCHelper.m; sourceTree = "<group>"; };
 		05BD736A2992D23800CF4FD7 /* libSMC.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libSMC.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		05BD73802992D35900CF4FD7 /* smc-dump */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "smc-dump"; sourceTree = BUILT_PRODUCTS_DIR; };
 		05BD73822992D35900CF4FD7 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
@@ -120,6 +112,10 @@
 		05BD739A2992F43500CF4FD7 /* NSException.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = NSException.h; sourceTree = "<group>"; };
 		05BD739B2992F43500CF4FD7 /* NSException.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = NSException.m; sourceTree = "<group>"; };
 		05BD73AB2992F52000CF4FD7 /* NSError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NSError.swift; sourceTree = "<group>"; };
+		05BD746E299404CD00CF4FD7 /* SMCData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCData.swift; sourceTree = "<group>"; };
+		05BD7471299405E000CF4FD7 /* SMCKit.modulemap */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.module-map"; path = SMCKit.modulemap; sourceTree = "<group>"; };
+		05BD74722994074E00CF4FD7 /* Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Bridging-Header.h"; sourceTree = "<group>"; };
+		05BD7473299408E200CF4FD7 /* SMCHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCHelper.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -172,14 +168,14 @@
 		05BD7284299275AB00CF4FD7 /* SMCKit */ = {
 			isa = PBXGroup;
 			children = (
+				05BD7471299405E000CF4FD7 /* SMCKit.modulemap */,
+				05BD74722994074E00CF4FD7 /* Bridging-Header.h */,
+				05BD7285299275AB00CF4FD7 /* SMCKit.h */,
 				05BD731C2992AD0600CF4FD7 /* SMC-Internal.h */,
 				05BD731D2992AD0600CF4FD7 /* SMC.h */,
 				05BD731B2992AD0600CF4FD7 /* SMC.m */,
-				05BD73172992AB7C00CF4FD7 /* SMCData.h */,
-				05BD73182992AB7C00CF4FD7 /* SMCData.m */,
-				05BD73212992AF3F00CF4FD7 /* SMCHelper.h */,
-				05BD73222992AF3F00CF4FD7 /* SMCHelper.m */,
-				05BD7285299275AB00CF4FD7 /* SMCKit.h */,
+				05BD746E299404CD00CF4FD7 /* SMCData.swift */,
+				05BD7473299408E200CF4FD7 /* SMCHelper.swift */,
 			);
 			path = SMCKit;
 			sourceTree = "<group>";
@@ -339,8 +335,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05BD73192992AB7C00CF4FD7 /* SMCData.h in Headers */,
-				05BD73232992AF3F00CF4FD7 /* SMCHelper.h in Headers */,
 				05BD731F2992AD0600CF4FD7 /* SMC-Internal.h in Headers */,
 				05BD73202992AD0600CF4FD7 /* SMC.h in Headers */,
 				05BD7286299275AB00CF4FD7 /* SMCKit.h in Headers */,
@@ -351,8 +345,6 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05BD73762992D2F900CF4FD7 /* SMCData.h in Headers */,
-				05BD73782992D2F900CF4FD7 /* SMCHelper.h in Headers */,
 				05BD73792992D2F900CF4FD7 /* SMC.h in Headers */,
 				05BD737A2992D2F900CF4FD7 /* SMCKit.h in Headers */,
 				05BD73772992D2F900CF4FD7 /* SMC-Internal.h in Headers */,
@@ -431,6 +423,7 @@
 					};
 					05BD73692992D23800CF4FD7 = {
 						CreatedOnToolsVersion = 14.2;
+						LastSwiftMigration = 1420;
 					};
 					05BD737F2992D35900CF4FD7 = {
 						CreatedOnToolsVersion = 14.2;
@@ -472,9 +465,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				05BD73242992AF3F00CF4FD7 /* SMCHelper.m in Sources */,
+				05BD7474299408E200CF4FD7 /* SMCHelper.swift in Sources */,
+				05BD746F299404CD00CF4FD7 /* SMCData.swift in Sources */,
 				05BD731E2992AD0600CF4FD7 /* SMC.m in Sources */,
-				05BD731A2992AB7C00CF4FD7 /* SMCData.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -483,8 +476,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				05BD73752992D2E300CF4FD7 /* SMC.m in Sources */,
-				05BD73732992D2E300CF4FD7 /* SMCData.m in Sources */,
-				05BD73742992D2E300CF4FD7 /* SMCHelper.m in Sources */,
+				05BD7475299408E200CF4FD7 /* SMCHelper.swift in Sources */,
+				05BD7470299404CD00CF4FD7 /* SMCData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -514,7 +507,7 @@
 /* Begin XCBuildConfiguration section */
 		05BD7287299275AB00CF4FD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05BD72EE299290A000CF4FD7 /* Debug - Library.xcconfig */;
+			baseConfigurationReference = 05BD72C3299290A000CF4FD7 /* Debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -527,7 +520,7 @@
 		};
 		05BD7288299275AB00CF4FD7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05BD72C6299290A000CF4FD7 /* Release - Library.xcconfig */;
+			baseConfigurationReference = 05BD72C4299290A000CF4FD7 /* Release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
 				CODE_SIGN_STYLE = Automatic;
@@ -540,8 +533,11 @@
 		};
 		05BD728A299275AB00CF4FD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05BD72EE299290A000CF4FD7 /* Debug - Library.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -556,14 +552,19 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.xs-labs.SMCKit";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Debug;
 		};
 		05BD728B299275AB00CF4FD7 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 05BD72C6299290A000CF4FD7 /* Release - Library.xcconfig */;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
@@ -578,6 +579,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.xs-labs.SMCKit";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
 			};
 			name = Release;
@@ -585,24 +587,48 @@
 		05BD73702992D23800CF4FD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SMC_STATIC=1",
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+				SWIFT_OBJC_BRIDGING_HEADER = "SMCKit/Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Debug;
 		};
 		05BD73712992D23800CF4FD7 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"SMC_STATIC=1",
+				);
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PUBLIC_HEADERS_FOLDER_PATH = /usr/local/include/SMC;
+				SWIFT_OBJC_BRIDGING_HEADER = "SMCKit/Bridging-Header.h";
+				SWIFT_VERSION = 5.0;
 			};
 			name = Release;
 		};
 		05BD73852992D35900CF4FD7 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05BD72C3299290A000CF4FD7 /* Debug.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
@@ -614,7 +640,6 @@
 		};
 		05BD73862992D35900CF4FD7 /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 05BD72C4299290A000CF4FD7 /* Release.xcconfig */;
 			buildSettings = {
 				CLANG_ENABLE_CODE_COVERAGE = NO;
 				GCC_GENERATE_TEST_COVERAGE_FILES = NO;
