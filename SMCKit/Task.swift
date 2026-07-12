@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2026, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -32,7 +32,7 @@ import Foundation
 internal class Task
 {
     /// The underlying process being run.
-    private var task:    Process
+    private var task: Process
 
     /// The pipe capturing the process's standard output.
     private var pipeOut: Pipe
@@ -44,10 +44,10 @@ internal class Task
     public private( set ) var terminationStatus: Int32?
 
     /// The data collected from the process's standard output.
-    public private( set ) var standardOutput:    Data
+    public private( set ) var standardOutput: Data
 
     /// The data collected from the process's standard error.
-    public private( set ) var standardError:     Data
+    public private( set ) var standardError: Data
 
     /// Runs an executable to completion, capturing its output.
     ///

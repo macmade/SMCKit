@@ -1,7 +1,7 @@
 /*******************************************************************************
  * The MIT License (MIT)
  *
- * Copyright (c) 2023, Jean-David Gadina - www.xs-labs.com
+ * Copyright (c) 2026, Jean-David Gadina - www.xs-labs.com
  *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the Software), to deal
@@ -33,23 +33,23 @@ import Foundation
 public class SMCData: NSObject
 {
     /// The SMC key code, as a 32-bit four-character code.
-    @objc public private( set ) dynamic var key:      UInt32
+    @objc public private( set ) dynamic var key: UInt32
 
     /// The SMC value type code, as a 32-bit four-character code.
-    @objc public private( set ) dynamic var type:     UInt32
+    @objc public private( set ) dynamic var type: UInt32
 
     /// The raw value bytes associated with the key.
-    @objc public private( set ) dynamic var data:     Data
+    @objc public private( set ) dynamic var data: Data
 
     /// The key code rendered as a four-character string.
-    @objc public private( set ) dynamic var keyName:  String
+    @objc public private( set ) dynamic var keyName: String
 
     /// The type code rendered as a four-character string.
     @objc public private( set ) dynamic var typeName: String
 
     /// The value decoded into a native type according to ``type``,
     /// or `nil` when the type is not recognized.
-    @objc public private( set ) dynamic var value:    Any?
+    @objc public private( set ) dynamic var value: Any?
 
     /// Creates a data object and decodes its value.
     ///

@@ -61,8 +61,8 @@ enum
  */
 enum
 {
-    kSMCSuccess	= 0,
-    kSMCError	= 1
+    kSMCSuccess = 0,
+    kSMCError   = 1
 };
 
 /*!

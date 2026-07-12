@@ -65,14 +65,14 @@ NS_ASSUME_NONNULL_BEGIN
  * @abstract    The IOKit connection to the @c AppleSMC service, or
  *              @c IO_OBJECT_NULL when no connection is open.
  */
-@property( nonatomic, readwrite, assign ) io_connect_t                                   connection;
+@property( nonatomic, readwrite, assign ) io_connect_t connection;
 
 /*!
  * @property    keys
  * @abstract    The cached list of SMC key codes, boxed as @c NSNumber values.
  * @discussion  Populated lazily on the first call to @c readAllKeys:.
  */
-@property( nonatomic, readwrite, strong ) NSMutableArray< NSNumber * >                 * keys;
+@property( nonatomic, readwrite, strong ) NSMutableArray< NSNumber * > * keys;
 
 /*!
  * @property    keyInfoCache
@@ -366,32 +366,32 @@ NS_ASSUME_NONNULL_END
     }
 
     io_service_t smc = IOServiceGetMatchingService( kIOMasterPortDefault, IOServiceMatching( "AppleSMC" ) );
-    
+
     if( smc == IO_OBJECT_NULL )
     {
         if( error )
         {
             *( error ) = [ SMCHelper errorWithTitle: @"Cannot Open SMC" message: @"Unable to retrieve the SMC service." code: -1 ];
         }
-        
+
         return NO;
     }
-    
+
     io_connect_t  connection = IO_OBJECT_NULL;
     kern_return_t result     = IOServiceOpen( smc, mach_task_self(), 0, &connection );
-    
+
     if( result != kIOReturnSuccess || connection == IO_OBJECT_NULL )
     {
         if( error )
         {
             *( error ) = [ SMCHelper errorWithTitle: @"Cannot Open SMC" message: @"Unable to open the SMC service." code: -1 ];
         }
-        
+
         return NO;
     }
-    
+
     self.connection = connection;
-    
+
     return YES;
 }
 
@@ -480,10 +480,10 @@ NS_ASSUME_NONNULL_END
     {
         return NO;
     }
-    
+
     {
         NSValue * cached = self.keyInfoCache[ [ NSNumber numberWithUnsignedInt: key ] ];
-        
+
         if( cached != nil )
         {
             [ cached getValue: info size: sizeof( SMCKeyInfoData ) ];
@@ -491,26 +491,26 @@ NS_ASSUME_NONNULL_END
             return YES;
         }
     }
-    
+
     SMCParamStruct input;
     SMCParamStruct output;
-    
+
     bzero( &input, sizeof( SMCParamStruct ) );
     bzero( &output, sizeof( SMCParamStruct ) );
-    
+
     input.data8 = kSMCGetKeyInfo;
     input.key   = key;
-    
+
     if( [ self callSMCFunction: kSMCHandleYPCEvent input: &input output: &output ] == NO )
     {
         return NO;
     }
-    
+
     if( output.result != kSMCSuccess )
     {
         return NO;
     }
-    
+
     *( info ) = output.keyInfo;
 
     self.keyInfoCache[ [ NSNumber numberWithUnsignedInt: key ] ] = [ NSValue valueWithBytes: &( output.keyInfo ) objCType: @encode( SMCKeyInfoData ) ];
@@ -531,28 +531,28 @@ NS_ASSUME_NONNULL_END
     {
         return NO;
     }
-    
+
     SMCParamStruct input;
     SMCParamStruct output;
-    
+
     bzero( &input, sizeof( SMCParamStruct ) );
     bzero( &output, sizeof( SMCParamStruct ) );
-    
+
     input.data8  = kSMCGetKeyFromIndex;
     input.data32 = index;
-    
+
     if( [ self callSMCFunction: kSMCHandleYPCEvent input: &input output: &output ] == NO )
     {
         return NO;
     }
-    
+
     if( output.result != kSMCSuccess )
     {
         return NO;
     }
-    
+
     *( key ) = output.key;
-    
+
     return YES;
 }
 
@@ -576,48 +576,48 @@ NS_ASSUME_NONNULL_END
     {
         return NO;
     }
-    
+
     SMCKeyInfoData info;
-    
+
     if( [ self readSMCKeyInfo: &info forKey: key ] == NO )
     {
         return NO;
     }
-    
+
     SMCParamStruct input;
     SMCParamStruct output;
-    
+
     bzero( &input, sizeof( SMCParamStruct ) );
     bzero( &output, sizeof( SMCParamStruct ) );
-    
+
     input.key              = key;
     input.data8            = kSMCReadKey;
     input.keyInfo.dataSize = info.dataSize;
-    
+
     if( [ self callSMCFunction: kSMCHandleYPCEvent input: &input output: &output ] == NO )
     {
         return NO;
     }
-    
+
     if( output.result != kSMCSuccess )
     {
         return NO;
     }
-    
+
     if( *( maxSize ) < info.dataSize )
     {
         return NO;
     }
-    
+
     if( keyInfo != NULL )
     {
         *( keyInfo ) = info;
     }
-    
+
     *( maxSize ) = info.dataSize;
-    
+
     bzero( buffer, *( maxSize ) );
-    
+
     for( uint32_t i = 0; i < info.dataSize; i++ )
     {
         if( key == kSMCKeyACID )
@@ -629,7 +629,7 @@ NS_ASSUME_NONNULL_END
             buffer[ i ] = output.bytes[ info.dataSize - ( i + 1 ) ];
         }
     }
-    
+
     return YES;
 }
 
@@ -643,14 +643,14 @@ NS_ASSUME_NONNULL_END
 {
     uint8_t  data[ 8 ];
     uint32_t size = sizeof( data );
-    
+
     bzero( data, size );
-    
+
     if( [ self readSMCKey: kSMCKeyNKEY buffer: data maxSize: &size keyInfo: NULL ] == NO )
     {
         return 0;
     }
-    
+
     return [ self readInteger: data size: size ];
 }
 
@@ -665,17 +665,17 @@ NS_ASSUME_NONNULL_END
 - ( uint32_t )readInteger: ( uint8_t * )data size: ( uint32_t )size
 {
     uint32_t n = 0;
-    
+
     if( size > sizeof( uint32_t ) )
     {
         return 0;
     }
-    
+
     for( uint32_t i = 0; i < size; i++ )
     {
         n |= ( uint32_t )( data[ i ] ) << ( i * 8 );
     }
-    
+
     return n;
 }
 
