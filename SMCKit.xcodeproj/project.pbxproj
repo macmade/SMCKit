@@ -31,6 +31,7 @@
 		0FCE0000000000000000000F /* SMCDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE0000000000000000000D /* SMCDataTests.swift */; };
 		0FCE00000000000000000012 /* SMCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000011 /* SMCTests.swift */; };
 		0FCE00000000000000000014 /* MachineDetailsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000013 /* MachineDetailsTests.swift */; };
+		0FCE00000000000000000016 /* TaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000015 /* TaskTests.swift */; };
 		0FCE00000000000000000010 /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD7282299275AB00CF4FD7 /* SMCKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -135,6 +136,7 @@
 		0FCE0000000000000000000D /* SMCDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCDataTests.swift; sourceTree = "<group>"; };
 		0FCE00000000000000000011 /* SMCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCTests.swift; sourceTree = "<group>"; };
 		0FCE00000000000000000013 /* MachineDetailsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MachineDetailsTests.swift; sourceTree = "<group>"; };
+		0FCE00000000000000000015 /* TaskTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TaskTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -365,6 +367,7 @@
 				0FCE0000000000000000000D /* SMCDataTests.swift */,
 				0FCE00000000000000000011 /* SMCTests.swift */,
 				0FCE00000000000000000013 /* MachineDetailsTests.swift */,
+				0FCE00000000000000000015 /* TaskTests.swift */,
 			);
 			path = SMCKitTests;
 			sourceTree = "<group>";
@@ -574,6 +577,7 @@
 				0FCE0000000000000000000F /* SMCDataTests.swift in Sources */,
 				0FCE00000000000000000012 /* SMCTests.swift in Sources */,
 				0FCE00000000000000000014 /* MachineDetailsTests.swift in Sources */,
+				0FCE00000000000000000016 /* TaskTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

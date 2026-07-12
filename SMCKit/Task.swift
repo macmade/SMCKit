@@ -102,6 +102,17 @@ internal class Task
         self.pipeErr.fileHandleForReading.waitForDataInBackgroundAndNotify()
     }
 
+    /// Removes the notification observers registered in `init`.
+    ///
+    /// The two `NSFileHandleDataAvailable` observers are registered against the
+    /// pipes' read handles for the lifetime of the task. Removing them here
+    /// avoids leaving stale registrations in the default `NotificationCenter`
+    /// once the task is deallocated.
+    deinit
+    {
+        NotificationCenter.default.removeObserver( self )
+    }
+
     /// Launches the process, optionally feeds it input, and waits for it to
     /// exit.
     ///

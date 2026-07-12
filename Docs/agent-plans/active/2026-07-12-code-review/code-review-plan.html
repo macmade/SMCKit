@@ -470,7 +470,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 7 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-low">Finding 4 · Low</span>
         <h3>7. Remove <code>Task</code>'s observers and make output capture robust</h3>
     </div>
@@ -486,11 +486,36 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
-    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Final approach — keep the notifications, add a <code>deinit</code> (Finding 4, Goal 1).</strong> The plan offered two routes: (a) keep the notification-based capture and add a <code>deinit</code> that removes the observers, or (b) redesign the capture to drain the pipes to EOF on a dedicated queue. An initial implementation took route (b) (concurrent <code>readDataToEndOfFile()</code> drain), but during review the maintainer directed keeping the notifications based on real-world experience that the <code>NSFileHandleDataAvailable</code> notification mechanism is the only reliable capture for long-running / large-output processes — regardless of what Apple's documentation suggests (see Review comments). The drain redesign was reverted and route (a) implemented instead.</p>
+        <p><strong>Changes made — minimal, additive:</strong></p>
+        <ul>
+            <li><code>SMCKit/Task.swift</code> — the original shipped notification-based capture (both <code>addObserver</code> registrations, the <code>waitForDataInBackgroundAndNotify()</code> re-arming, and the two <code>@objc dataAvailableForStandard{Output,Error}(_:)</code> handlers) is left <em>unchanged</em>. The only addition is a <code>deinit</code> that calls <code>NotificationCenter.default.removeObserver( self )</code>, which unregisters both observers (the broad form removes every registration whose observer is <code>self</code>, regardless of name/<code>object:</code>). This closes the leak — previously the center kept two stale, unretained entries pointing at the deallocated <code>Task</code> and its (also-deallocated) pipe read handles. Documented with a doc comment per convention.</li>
+            <li>No other production code changed. Public surface (<code>run(executable:arguments:input:)</code>, <code>standardOutput</code>, <code>standardError</code>, <code>terminationStatus</code>) and the <code>SMCException.doTry</code> launch guard are all intact; the sole caller <code>MachineDetails.hardwareDetails</code> is unaffected (adding a <code>deinit</code> cannot change runtime behavior).</li>
+            <li><code>SMCKitTests/TaskTests.swift</code> — new <code>@Suite "Task"</code> with 6 hardware-independent tests (stdout capture, stdout/stderr separation, <strong>1 MB output</strong> beyond the 64 KB pipe buffer, stdin round-trip via <code>/bin/cat</code>, termination status 0/7, and launch-failure → <code>nil</code>). These lock in the capture behavior of the notification implementation and act as regression guards. Registered in <code>SMCKit.xcodeproj</code> with fresh non-colliding IDs (fileRef <code>0015</code>, buildFile <code>0016</code>); <code>plutil -lint</code> OK. No SwiftPM manifest to sync.</li>
+        </ul>
+        <p><strong>Scope note on Goal 2.</strong> The finding's second half (make capture insensitive to notification delivery order) is addressed by the maintainer's decision rather than by code: on this project the notification-based capture is the deliberately-chosen, field-proven mechanism, and the 1 MB regression test confirms it captures output well beyond the pipe buffer without truncation or stalling. The observer leak (Goal 1), the deterministic part of the finding, is fixed by the <code>deinit</code>.</p>
+        <p><strong>Note on the large-output test.</strong> The <code>capturesLargeOutput</code> (1 MB) test passes against the notification implementation — the background <code>NSFileHandleDataAvailable</code> observers, re-armed after each chunk and pumped by the run loop that <code>waitUntilExit()</code> spins, collect the full output. (Its doc comment was corrected to describe this notification-based behavior rather than the rejected drain-to-EOF approach — see Automated review round 2.)</p>
+        <p><strong>Verification.</strong> Full suite <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>33/33 passed</strong> (27 existing + 6 new). Clean <code>build</code> under <code>-Wdocumentation -Werror</code>, no warnings. Working tree limited to <code>SMCKit/Task.swift</code>, <code>SMCKit.xcodeproj/project.pbxproj</code>, and the new <code>SMCKitTests/TaskTests.swift</code>; temporary artifacts cleaned up.</p>
+        <p><strong>Automated review loop.</strong> Two rounds across the two designs. Round 1 reviewed the initial drain redesign (now superseded/reverted). Round 2 reviewed the shipped notifications+<code>deinit</code> change: a fresh-context reviewer confirmed the <code>removeObserver(self)</code> fix is correct, complete and safe in <code>deinit</code> (no retain cycle, thread-safe, no remaining dangling-observer risk), no behavioral regression, consistent pbxproj wiring, and thorough non-flaky tests (verified by running the suite 6×). It raised one Low doc-accuracy finding on the test comment, which was fixed. Converged with no Critical/High/Medium.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer, on the initial concurrent-EOF-drain design — later reverted per the maintainer's decision to keep notifications; retained here for the record): converged, no Critical/High/Medium. Two deferred items — a Low noting the background drains ran outside the <code>SMCException.doTry</code> guard (not a regression), and an Info style nit (<code>var</code> vs <code>let</code>). Both are moot now that the drain design was reverted.</p>
+        <p>Round 2 (fresh-context reviewer, on the shipped notifications+<code>deinit</code> change) — converged, no Critical/High/Medium findings.</p>
+        <ul>
+            <li><span class="sev sev-low">Low</span> <strong>Test doc comment described the rejected drain-to-EOF design</strong> — the <code>capturesLargeOutput</code> comment still said "draining the pipe to end of file … the previous notification-based capture could drop the last chunk", inconsistent with the shipped notification-based code under test. <em>Fixed</em> — rewritten to describe the notification-based, run-loop-pumped capture that the test actually guards.</li>
+            <li><span class="sev sev-info">Info</span> <strong>Whitespace nit</strong> — a double space before <code>arguments:</code> in the termination-status test. <em>Fixed.</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>No direct observer-removal assertion</strong> — genuinely hard to observe; each test's <code>task</code> is deallocated at scope exit so <code>deinit</code> does run during the suite. <em>Deferred — no action needed.</em></li>
+            <li>Confirmed (Info): the <code>deinit</code> fix is correct/complete/safe, no regression, pbxproj consistent and lint-clean, and the 6 tests are thorough, hardware-independent and non-flaky.</li>
+        </ul>
+    </div>
+    <div class="field"><span class="label">Review comments</span>
+        <p>User asked: why did you remove the notifications? (Genuine question about the design choice — answered, no code change made pending confirmation.)</p>
+        <p>User raised a concern to verify online: using notifications on <code>NSProcess</code>/<code>Process</code> is required for some long-running tasks, or tasks producing large output — removing them might break the project. (Asked me to verify against online sources before concluding.)</p>
+        <p><strong>Decision — keep the notifications.</strong> User has real-world experience: notifications are the only reliable way despite what Apple's documentation may say. Directed to keep the notification-based capture and (per the milestone's Goal 1) add a <code>deinit</code> that removes the observers to fix the leak, rather than replacing the notification mechanism.</p>
+    </div>
 </div>
 
 <!-- ============================ PHASE D ============================ -->
