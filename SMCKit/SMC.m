@@ -116,10 +116,26 @@ NS_ASSUME_NONNULL_BEGIN
  * @param       input    The populated request structure.
  * @param       output   On return, the response structure from the SMC.
  * @return      @c YES on success, otherwise @c NO.
- * @discussion  Opens the user client, dispatches the structured call and closes
- *              the user client around the request.
+ * @discussion  Dispatches the structured call on the already-open user-client
+ *              session, which @c readAllKeys: opens once around a batch.
  */
 - ( BOOL )callSMCFunction: ( uint32_t )function input: ( const SMCParamStruct * )input output: ( SMCParamStruct * )output;
+
+/*!
+ * @method      openUserClientSession
+ * @abstract    Opens a session on the SMC user client.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Opened once around a batch of reads by @c readAllKeys: rather
+ *              than around each structured call. Must be balanced by
+ *              @c closeUserClientSession.
+ */
+- ( BOOL )openUserClientSession;
+
+/*!
+ * @method      closeUserClientSession
+ * @abstract    Closes the session opened by @c openUserClientSession.
+ */
+- ( void )closeUserClientSession;
 
 /*!
  * @method      readSMCKeyInfo:forKey:
@@ -268,11 +284,20 @@ NS_ASSUME_NONNULL_END
  *              @c queue.
  * @param       filter The optional per-key filter block; see @c readAllKeys:.
  * @return      An array of @c SMCData objects for the keys read successfully,
- *              or an empty array if the connection is not open.
+ *              or an empty array if the connection is not open or the
+ *              user-client session cannot be opened.
+ * @discussion  Opens the user-client session once for the whole batch (via
+ *              @c openUserClientSession) and closes it when done, so the
+ *              per-key reads do not each pay an open/close round-trip.
  */
 - ( NSArray< SMCData * > *  )readAllKeysUnsynchronized: ( BOOL ( ^ _Nullable )( uint32_t ) )filter
 {
     if( self.connection == IO_OBJECT_NULL )
+    {
+        return @[];
+    }
+
+    if( [ self openUserClientSession ] == NO )
     {
         return @[];
     }
@@ -319,6 +344,8 @@ NS_ASSUME_NONNULL_END
 
         [ items addObject: item ];
     }
+
+    [ self closeUserClientSession ];
 
     return items;
 }
@@ -398,25 +425,44 @@ NS_ASSUME_NONNULL_END
  * @param       input    The populated request structure.
  * @param       output   On return, the response structure from the SMC.
  * @return      @c YES on success, otherwise @c NO.
- * @discussion  Opens the user client, dispatches the structured call and closes
- *              the user client around the request.
+ * @discussion  Dispatches the structured call on the already-open user-client
+ *              session. The session is opened once around a batch of reads by
+ *              @c readAllKeys: (via @c openUserClientSession), not around each
+ *              call, so this method does not open or close it.
  */
 - ( BOOL )callSMCFunction: ( uint32_t )function input: ( const SMCParamStruct * )input output: ( SMCParamStruct * )output
 {
     size_t        inputSize  = sizeof( SMCParamStruct );
     size_t        outputSize = sizeof( SMCParamStruct );
-    kern_return_t result     = IOConnectCallMethod( self.connection, kSMCUserClientOpen, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL );
-    
-    if( result != kIOReturnSuccess )
-    {
-        return NO;
-    }
-    
-    result = IOConnectCallStructMethod( self.connection, function, input, inputSize, output, &outputSize );
-    
-    IOConnectCallMethod( self.connection, kSMCUserClientClose, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL );
-    
+    kern_return_t result     = IOConnectCallStructMethod( self.connection, function, input, inputSize, output, &outputSize );
+
     return result == kIOReturnSuccess;
+}
+
+/*!
+ * @method      openUserClientSession
+ * @abstract    Opens a session on the SMC user client.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Sends @c kSMCUserClientOpen on @c connection. Called once around
+ *              a batch of reads by @c readAllKeys: rather than around every
+ *              structured call, avoiding the many redundant open/close
+ *              round-trips a full enumeration would otherwise perform. Must be
+ *              balanced by @c closeUserClientSession.
+ */
+- ( BOOL )openUserClientSession
+{
+    return IOConnectCallMethod( self.connection, kSMCUserClientOpen, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL ) == kIOReturnSuccess;
+}
+
+/*!
+ * @method      closeUserClientSession
+ * @abstract    Closes the session opened by @c openUserClientSession.
+ * @discussion  Sends @c kSMCUserClientClose on @c connection, balancing a prior
+ *              successful @c openUserClientSession at the end of a batch.
+ */
+- ( void )closeUserClientSession
+{
+    IOConnectCallMethod( self.connection, kSMCUserClientClose, NULL, 0, NULL, 0, NULL, NULL, NULL, NULL );
 }
 
 /*!

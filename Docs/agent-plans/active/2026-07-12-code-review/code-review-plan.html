@@ -381,7 +381,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 5 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-low">Finding 6 · Low</span>
         <h3>5. Hoist the user-client open/close out of the per-call hot path</h3>
     </div>
@@ -398,10 +398,26 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses — record the open/close investigation outcome.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Hardware investigation (Apple Silicon M4, macOS 26.5.1).</strong> Captured a baseline <code>smc-dump</code> (<strong>1979</strong> keys read). Then, as an experiment, removed the per-call <code>kSMCUserClientOpen</code>/<code>kSMCUserClientClose</code> <em>entirely</em> from <code>callSMCFunction:</code> (relying only on the <code>IOServiceOpen</code> connection) and re-dumped: <strong>identical</strong> — same 1979 keys and a byte-for-byte identical key/type/size set (empty <code>diff</code> on the stable columns), with correct values. So on this hardware the per-call session open/close is <em>not functionally required</em>; the <code>IOServiceOpen</code> connection alone suffices.</p>
+        <p><strong>Design chosen — hoist, don't remove (Intel-safe).</strong> Because Intel Macs use a physically different SMC that cannot be exercised here and may genuinely need the session, the pairing was <em>kept</em> but moved out of the per-call hot path to once per <code>readAllKeys</code> batch — the finding's literal recommendation. Removing it entirely was rejected as too risky for hardware that cannot be tested here.</p>
+        <ul>
+            <li><code>callSMCFunction:</code> no longer opens/closes; it now just performs the <code>IOConnectCallStructMethod</code>. Doc updated.</li>
+            <li>Added two private helpers: <code>openUserClientSession</code> (sends <code>kSMCUserClientOpen</code>, returns success) and <code>closeUserClientSession</code> (sends <code>kSMCUserClientClose</code>), with HeaderDoc and private-category declarations.</li>
+            <li><code>readAllKeysUnsynchronized:</code> now opens the session once (after the null-connection guard; returns <code>@[]</code> if the open fails), runs the full enumeration + read loop, then closes it before returning. This runs entirely on the Milestone&nbsp;3 serial <code>queue</code>, so the session calls stay serialized with all other <code>connection</code> access — no new race, no change to the concurrency contract. Per-batch open/close drops from ~thousands to exactly one pair.</li>
+        </ul>
+        <p><strong>Validation.</strong> Rebuilt <code>smc-dump</code> with the shipping design and re-dumped: <strong>identical</strong> to baseline (1979 keys, empty triple <code>diff</code>, correct values). Full suite <code>xcodebuild -scheme SMCKit test</code> — <strong>24/24 passed</strong>. Clean <code>build</code> under <code>-Wdocumentation -Werror</code>. All experiment builds cleaned up; the working tree holds only <code>SMCKit/SMC.m</code>. Left the lowercase <code>return false;</code> in <code>-close</code> untouched (Milestone&nbsp;9).</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged. A fresh-context reviewer traced every <code>callSMCFunction:</code> caller (all three lie within the open/close span), verified the open/close is exactly balanced on all control-flow paths (no leaked or double-closed session), confirmed thread-safety is preserved, and found no leftover per-call open/close. No Critical/High/Medium/Low findings.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, no Critical/High/Medium/Low findings. One Info observation:</p>
+        <ul>
+            <li><span class="sev sev-info">Info</span> <strong>All-or-nothing on batch-open failure</strong> — previously a transient per-call open failure skipped only that key; now a failed batch open returns an empty result. In practice an open failure reflects a persistent connection-level condition under which every per-call open would also have failed (empty result anyway), so it is not a real regression, and the new contract is documented in the return-value comment. <em>Deferred — acceptable as designed.</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>Doc wording</strong> — a helper comment said "hundreds" of round-trips where a full enumeration does closer to thousands. <em>Fixed — reworded to "the many redundant open/close round-trips".</em></li>
+        </ul>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 
