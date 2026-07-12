@@ -39,17 +39,24 @@ public class SMCHelper: NSObject
 
     /// Renders a 32-bit value as a four-character-code string.
     ///
+    /// Any non-printable byte is replaced with a dot (`.`), mirroring
+    /// ``printableString(data:)``, so a `NUL` or control byte is never embedded
+    /// raw in the result (which would otherwise truncate or corrupt the string).
+    ///
     /// - Parameter value: The 32-bit value to render.
     /// - Returns: A four-character string built from the value's bytes.
     @objc( fourCC: )
     public class func fourCC( value: UInt32 ) -> String
     {
-        let c1 = UInt8( ( value >> 24 ) & 0xFF )
-        let c2 = UInt8( ( value >> 16 ) & 0xFF )
-        let c3 = UInt8( ( value >>  8 ) & 0xFF )
-        let c4 = UInt8( ( value >>  0 ) & 0xFF )
+        let bytes = [
+            UInt8( ( value >> 24 ) & 0xFF ),
+            UInt8( ( value >> 16 ) & 0xFF ),
+            UInt8( ( value >>  8 ) & 0xFF ),
+            UInt8( ( value >>  0 ) & 0xFF ),
+        ]
+        let printable = bytes.map { isprint( Int32( $0 ) ) == 0 ? 46 : $0 }
 
-        return String( format: "%c%c%c%c", c1, c2, c3, c4 )
+        return String( format: "%c%c%c%c", printable[ 0 ], printable[ 1 ], printable[ 2 ], printable[ 3 ] )
     }
 
     /// Decodes raw SMC bytes into a native value according to their type code.
@@ -93,7 +100,7 @@ public class SMCHelper: NSObject
             case "ioft": return self.ioFloat( data: data )
             case "sp78": return self.sp78(    data: data )
 
-            case "flag": return self.uint8( data: data ) == 1 ? true : false
+            case "flag": return self.uint8( data: data ) != 0
 
             case "ch8*": return self.string( data: data )
 

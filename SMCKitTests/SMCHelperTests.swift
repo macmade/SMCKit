@@ -34,12 +34,23 @@ struct SMCHelperTests
 
     /// A four-character-code value is rendered from its bytes, most significant
     /// byte first.
+    ///
+    /// Non-printable bytes (a `NUL` or control character) are replaced with a
+    /// dot rather than embedded raw in the string, so the result never contains
+    /// a `NUL`.
     @Test( "fourCC renders a value as a four-character string" )
     func fourCC()
     {
         #expect( SMCHelper.fourCC( value: 0x234B4559 ) == "#KEY" )
         #expect( SMCHelper.fourCC( value: 0x75693332 ) == "ui32" )
         #expect( SMCHelper.fourCC( value: 0x666C6167 ) == "flag" )
+
+        // '#', NUL, 0x01 (control), 'Y' — the two non-printable bytes become dots.
+        #expect( SMCHelper.fourCC( value: 0x23000159 ) == "#..Y" )
+        #expect( SMCHelper.fourCC( value: 0x23000159 ).contains( "\0" ) == false )
+
+        // Every byte non-printable.
+        #expect( SMCHelper.fourCC( value: 0x00010203 ) == "...." )
     }
 
     // MARK: - Unsigned integers
@@ -166,6 +177,8 @@ struct SMCHelperTests
         #expect( SMCHelper.value( for: Data( [ 0xFF ] ), type: 0x73693820 ) as? Int8  == -1 )    // "si8 "
         #expect( SMCHelper.value( for: Data( [ 0x01 ] ), type: 0x666C6167 ) as? Bool  == true )  // "flag"
         #expect( SMCHelper.value( for: Data( [ 0x00 ] ), type: 0x666C6167 ) as? Bool  == false ) // "flag"
+        #expect( SMCHelper.value( for: Data( [ 0x02 ] ), type: 0x666C6167 ) as? Bool  == true )  // "flag" — any non-zero byte is true
+        #expect( SMCHelper.value( for: Data( [ 0xFF ] ), type: 0x666C6167 ) as? Bool  == true )  // "flag"
         #expect( SMCHelper.value( for: Data( [ 0x42, 0x41 ] ), type: 0x6368382A ) as? String == "AB" ) // "ch8*"
     }
 

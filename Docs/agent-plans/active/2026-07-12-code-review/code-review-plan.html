@@ -524,7 +524,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 8 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-info">Finding 9 · Info</span>
         <span class="sev sev-info">Finding 10 · Info</span>
         <h3>8. Harden <code>flag</code> decoding and <code>fourCC</code> NUL handling</h3>
@@ -541,10 +541,26 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Two small defensive fixes in <code>SMCKit/SMCHelper.swift</code>, both additive and minimal.</strong></p>
+        <ul>
+            <li><strong>Finding 9 — <code>flag</code> decoding.</strong> Changed the <code>flag</code> case in <code>value(for:type:)</code> from <code>self.uint8( data: data ) == 1 ? true : false</code> to <code>self.uint8( data: data ) != 0</code>, so any non-zero byte (e.g. <code>2</code>, <code>0xFF</code>) maps to <code>true</code>, matching boolean intent. The <code>0</code>→<code>false</code> / <code>1</code>→<code>true</code> cases are unchanged, so no regression.</li>
+            <li><strong>Finding 10 — <code>fourCC</code> NUL handling.</strong> <code>fourCC(value:)</code> now maps each of the four bytes through <code>isprint( Int32( $0 ) ) == 0 ? 46 : $0</code> — mirroring <code>printableString(data:)</code> exactly (<code>46</code> is ASCII <code>.</code>) — before formatting, so a <code>NUL</code> or control byte becomes a dot instead of being embedded raw. Verified during TDD that the <em>old</em> code did not merely embed a <code>NUL</code> but actually <strong>truncated</strong> the string at it (<code>0x23000159</code> → <code>"#Y"</code>, <code>0x00010203</code> → <code>""</code>), so this also fixes silent data loss in the displayed key/type names. Normal printable-ASCII output (<code>"#KEY"</code>, <code>"ui32"</code>, <code>"flag"</code>, and the space-padded codes like <code>"si8 "</code>) is unchanged, so the type-code matching in the <code>value(for:type:)</code> switch and the display in <code>SMCData</code> both behave identically for real SMC codes.</li>
+        </ul>
+        <p><strong>Tests — <code>SMCKitTests/SMCHelperTests.swift</code> (extended existing cases):</strong> the <code>fourCC</code> test now asserts <code>0x23000159</code> → <code>"#..Y"</code> (with a <code>.contains("\0") == false</code> guard) and the all-non-printable <code>0x00010203</code> → <code>"...."</code>; the <code>value decodes single-byte and flag types</code> test now asserts <code>flag</code> bytes <code>0x02</code> and <code>0xFF</code> → <code>true</code>. Both keep the pre-existing printable/0/1 assertions.</p>
+        <p><strong>TDD red→green.</strong> Ran the extended tests against the current code first: the four new assertions failed (old <code>fourCC</code> truncated at the <code>NUL</code>; old <code>flag</code> gave <code>false</code> for <code>0x02</code>/<code>0xFF</code>). After the two fixes, the full suite is green.</p>
+        <p><strong>Verification.</strong> <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>33/33 passed</strong>. Clean <code>build</code> under <code>-Wdocumentation -Werror</code>. Working tree limited to <code>SMCKit/SMCHelper.swift</code> and <code>SMCKitTests/SMCHelperTests.swift</code>. No pbxproj change needed (edited existing files only).</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged. A fresh-context reviewer verified both fixes, confirmed the type-code matching path is preserved (space <code>0x20</code> is printable, so the space-padded codes still match), checked the <code>SMCData</code> display callers, the safe 4-element array indexing, and the test correctness. No Critical/High/Medium findings; one Info consistency nit (drop the redundant <code>UInt8(46)</code> wrapper to match <code>printableString</code>'s bare <code>46</code>) was applied.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, no Critical/High/Medium findings. Two Info nits:</p>
+        <ul>
+            <li><span class="sev sev-info">Info</span> <strong>Redundant <code>UInt8(46)</code> wrapper</strong> — <code>printableString</code> writes the same placeholder as a bare <code>46</code> (inferred as <code>UInt8</code> from <code>$0</code>); the explicit wrapper was unnecessary and the two otherwise-mirrored expressions differed only here. <em>Fixed — changed to bare <code>46</code> so <code>fourCC</code> mirrors <code>printableString</code> exactly.</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>Test comment nicety</strong> — the "two non-printable bytes become dots" comment reads correctly for <code>0x23000159</code>. <em>No action.</em></li>
+        </ul>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 
