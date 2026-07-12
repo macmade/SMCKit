@@ -77,8 +77,10 @@ NS_ASSUME_NONNULL_BEGIN
 /*!
  * @property    keyInfoCache
  * @abstract    A cache mapping key codes to their @c SMCKeyInfoData metadata.
- * @discussion  Each value is an @c NSValue wrapping a heap-allocated
- *              @c SMCKeyInfoData pointer, avoiding repeated SMC round-trips.
+ * @discussion  Each value is an @c NSValue boxing an @c SMCKeyInfoData struct
+ *              by value, avoiding repeated SMC round-trips. Boxing by value
+ *              (rather than wrapping a heap pointer) keeps the cache free of
+ *              manual memory management.
  */
 @property( nonatomic, readwrite, strong ) NSMutableDictionary< NSNumber *, NSValue * > * keyInfoCache;
 
@@ -438,8 +440,8 @@ NS_ASSUME_NONNULL_END
         
         if( cached != nil )
         {
-            *( info ) = *( ( SMCKeyInfoData * )( cached.pointerValue ) );
-            
+            [ cached getValue: info size: sizeof( SMCKeyInfoData ) ];
+
             return YES;
         }
     }
@@ -464,17 +466,9 @@ NS_ASSUME_NONNULL_END
     }
     
     *( info ) = output.keyInfo;
-    
-    {
-        SMCKeyInfoData * cached = calloc( sizeof( SMCKeyInfoData ), 1 );
-        
-        if( cached != NULL )
-        {
-            *( cached )                                                  = output.keyInfo;
-            self.keyInfoCache[ [ NSNumber numberWithUnsignedInt: key ] ] = [ NSValue valueWithPointer: cached ];
-        }
-    }
-    
+
+    self.keyInfoCache[ [ NSNumber numberWithUnsignedInt: key ] ] = [ NSValue valueWithBytes: &( output.keyInfo ) objCType: @encode( SMCKeyInfoData ) ];
+
     return YES;
 }
 

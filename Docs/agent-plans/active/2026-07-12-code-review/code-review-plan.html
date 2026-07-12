@@ -339,7 +339,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 4 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-low">Finding 5 · Low</span>
         <span class="sev sev-info">Finding 7 · Info</span>
         <h3>4. Fix the <code>keyInfoCache</code> leak and the <code>calloc</code> argument order</h3>
@@ -356,10 +356,25 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Approach — box the struct by value (preferred option).</strong> Took the inline-<code>NSValue</code> route rather than freeing raw pointers in <code>-dealloc</code>. This removes the heap allocation entirely, so Finding&nbsp;7 (the <code>calloc</code> argument order) is resolved by deletion, and there is no raw pointer to leak, free, or mismanage. All changes are confined to <code>-readSMCKeyInfo:forKey:</code> in <code>SMCKit/SMC.m</code>; <code>-dealloc</code> needs no change.</p>
+        <ul>
+            <li><strong>Write path:</strong> replaced the <code>calloc</code> + <code>[NSValue valueWithPointer:]</code> block with a single <code>self.keyInfoCache[ key ] = [ NSValue valueWithBytes: &amp;( output.keyInfo ) objCType: @encode( SMCKeyInfoData ) ]</code> — the struct is boxed by value and owned by the <code>NSValue</code> under ARC.</li>
+            <li><strong>Read path:</strong> replaced <code>*info = *( ( SMCKeyInfoData * )cached.pointerValue )</code> with <code>[ cached getValue: info size: sizeof( SMCKeyInfoData ) ]</code> (available since macOS 10.13; deployment target is 10.15).</li>
+            <li>Updated the <code>keyInfoCache</code> property doc comment to describe value-boxing (no heap pointer / no manual memory management).</li>
+        </ul>
+        <p><strong>Verification.</strong></p>
+        <ul>
+            <li><strong>Regression / cache correctness:</strong> full suite <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>24/24 passed</strong>. End-to-end, <code>smc-dump</code> still decodes values correctly (the <code>4 bytes</code>/<code>8 bytes</code> lengths and sane readings confirm the cached <code>dataSize</code>/<code>dataType</code> round-trips correctly through <code>getValue:size:</code>; a broken read-back would garble or skip every value).</li>
+            <li><strong>Leak fixed — real red→green with the macOS <code>leaks</code> tool.</strong> A harness that creates a non-<code>shared</code> <code>SMC()</code>, calls <code>readAllKeys()</code>, and lets it deallocate (5×) was run under <code>leaks --atExit</code>. Against the pre-fix (HEAD) code: <strong>10,625 leaks / 340,000 bytes</strong> (the orphaned per-key <code>SMCKeyInfoData</code> blocks). Against the fixed code: <strong>0 leaks</strong>. The HEAD build was produced from a temporary checkout and the fix restored from a backup afterwards; the working tree holds only the intended change.</li>
+        </ul>
+        <p><strong>Automated review loop.</strong> 1 round, converged with <em>no findings at all</em>. A fresh-context reviewer verified the <code>@encode</code>/<code>getValue:size:</code> size round-trip (<code>sizeof(SMCKeyInfoData) == 12</code>, matching the boxed size, so no size-mismatch exception and no out-of-bounds copy), the <code>&amp;output.keyInfo</code> lifetime, overwrite safety (ARC releases the replaced <code>NSValue</code>), preserved behavior/control-flow, the unchanged serialization, and confirmed no <code>calloc</code>/<code>malloc</code>/<code>free</code>/<code>pointerValue</code> remain.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, <strong>no findings</strong> (no Critical/High/Medium/Low/Info). Verified round-trip correctness, lifetime safety, leak removal, overwrite safety, behavior preservation, thread-safety, and style.</p>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 
