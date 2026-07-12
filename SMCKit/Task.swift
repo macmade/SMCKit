@@ -114,7 +114,16 @@ internal class Task
     }
 
     /// Launches the process, optionally feeds it input, and waits for it to
-    /// exit.
+    /// exit while capturing its output.
+    ///
+    /// While the process runs, the `NSFileHandleDataAvailable` observers
+    /// registered in `init` drain the pipes from the run loop that
+    /// `waitUntilExit()` pumps, which keeps a full pipe buffer from blocking
+    /// the child. Those notifications stop being delivered the moment the
+    /// process exits, though, so any bytes buffered after the last one would be
+    /// lost. Once the process has exited, the observers are removed and each
+    /// pipe is drained to end of file to append that final chunk — the read
+    /// cannot block because the child has already closed its write ends.
     ///
     /// - Parameter input: Optional data to write to the process's standard
     ///   input before waiting for it to finish.
@@ -136,6 +145,11 @@ internal class Task
         }
 
         self.task.waitUntilExit()
+
+        NotificationCenter.default.removeObserver( self )
+
+        self.standardOutput.append( self.pipeOut.fileHandleForReading.readDataToEndOfFile() )
+        self.standardError.append( self.pipeErr.fileHandleForReading.readDataToEndOfFile() )
 
         self.terminationStatus = self.task.terminationStatus
     }
