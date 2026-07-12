@@ -24,16 +24,39 @@
 
 import Foundation
 
+/// Runs an external process synchronously and captures its output.
+///
+/// `Task` wraps `Process`, collecting the child process's standard output and
+/// standard error in the background while waiting for it to exit. It is used to
+/// invoke command-line tools such as `system_profiler`.
 internal class Task
 {
+    /// The underlying process being run.
     private var task:    Process
+
+    /// The pipe capturing the process's standard output.
     private var pipeOut: Pipe
+
+    /// The pipe capturing the process's standard error.
     private var pipeErr: Pipe
 
+    /// The process's exit status, or `nil` until it has exited.
     public private( set ) var terminationStatus: Int32?
+
+    /// The data collected from the process's standard output.
     public private( set ) var standardOutput:    Data
+
+    /// The data collected from the process's standard error.
     public private( set ) var standardError:     Data
 
+    /// Runs an executable to completion, capturing its output.
+    ///
+    /// - Parameters:
+    ///   - executable: The URL of the executable to run.
+    ///   - arguments:  The command-line arguments to pass.
+    ///   - input:      Optional data to write to the process's standard input.
+    /// - Returns: A finished `Task` on success, or `nil` if launching the
+    ///   process raised an exception.
     public class func run( executable: URL, arguments: [ String ], input: Data? ) -> Task?
     {
         let task = Task( executable: executable, arguments: arguments )
@@ -53,6 +76,11 @@ internal class Task
         }
     }
 
+    /// Creates a task and configures its pipes and notifications.
+    ///
+    /// - Parameters:
+    ///   - executable: The URL of the executable to run.
+    ///   - arguments:  The command-line arguments to pass.
     private init( executable: URL, arguments: [ String ] )
     {
         self.pipeOut = Pipe()
@@ -74,6 +102,11 @@ internal class Task
         self.pipeErr.fileHandleForReading.waitForDataInBackgroundAndNotify()
     }
 
+    /// Launches the process, optionally feeds it input, and waits for it to
+    /// exit.
+    ///
+    /// - Parameter input: Optional data to write to the process's standard
+    ///   input before waiting for it to finish.
     private func run( input: Data? )
     {
         if let _ = input
@@ -96,6 +129,11 @@ internal class Task
         self.terminationStatus = self.task.terminationStatus
     }
 
+    /// Appends newly available standard-output data and re-arms the
+    /// notification.
+    ///
+    /// - Parameter notification: The `NSFileHandleDataAvailable` notification
+    ///   posted by the standard-output file handle.
     @objc
     private func dataAvailableForStandardOutput( _ notification: Notification )
     {
@@ -110,6 +148,11 @@ internal class Task
         handle?.waitForDataInBackgroundAndNotify()
     }
 
+    /// Appends newly available standard-error data and re-arms the
+    /// notification.
+    ///
+    /// - Parameter notification: The `NSFileHandleDataAvailable` notification
+    ///   posted by the standard-error file handle.
     @objc
     private func dataAvailableForStandardError( _ notification: Notification )
     {

@@ -24,11 +24,21 @@
 
 import Foundation
 
+/// Gathers descriptive information about the current machine.
+///
+/// The details are used to build the header of an SMC dump: the current date,
+/// the operating-system version, and hardware information obtained from
+/// `system_profiler` (falling back to the `hw.model` sysctl value).
 internal class MachineDetails
 {
+    /// Unavailable; `MachineDetails` exposes only static members.
     private init()
     {}
 
+    /// The full list of machine details as label/value pairs.
+    ///
+    /// Combines the date, the system version and either the parsed hardware
+    /// details or, as a fallback, the raw hardware model identifier.
     public static var all: [ ( String, String ) ]
     {
         [
@@ -42,16 +52,21 @@ internal class MachineDetails
         }
     }
 
+    /// The current date and time, formatted as an ISO-8601 string.
     public static var date: String
     {
         ISO8601DateFormatter().string( from: Date())
     }
 
+    /// The operating-system version string reported by `ProcessInfo`.
     public static var systemVersion: String
     {
         ProcessInfo.processInfo.operatingSystemVersionString
     }
 
+    /// The hardware model identifier from the `hw.model` sysctl.
+    ///
+    /// Returns `"--"` if the value cannot be read.
     public static var hardwareModel: String
     {
         var length: size_t = 0
@@ -73,6 +88,13 @@ internal class MachineDetails
         return String( cString: model )
     }
 
+    /// Hardware details parsed from `system_profiler`'s hardware data type.
+    ///
+    /// Runs `system_profiler SPHardwareDataType`, extracts each `label: value`
+    /// line and keeps only the keys listed in ``validHardwareDetailsKeys``.
+    ///
+    /// - Returns: The label/value pairs, or `nil` if the tool cannot be run,
+    ///   its output cannot be decoded, or no matching keys are found.
     public static var hardwareDetails: [ ( String, String ) ]?
     {
         guard let task = Task.run( executable: URL( fileURLWithPath: "/usr/sbin/system_profiler" ), arguments: [ "SPHardwareDataType" ], input: nil )
@@ -123,6 +145,8 @@ internal class MachineDetails
         return details.isEmpty ? nil : details
     }
 
+    /// The set of `system_profiler` hardware keys to keep in
+    /// ``hardwareDetails``.
     private static var validHardwareDetailsKeys: [ String ]
     {
         [

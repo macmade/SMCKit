@@ -24,16 +24,39 @@
 
 import Foundation
 
+/// Represents a single key/value pair read from the SMC.
+///
+/// An `SMCData` object bundles the raw key and type codes, the raw value
+/// bytes, their human-readable four-character-code representations, and the
+/// value decoded into a native Swift type when possible.
 @objc
 public class SMCData: NSObject
 {
+    /// The SMC key code, as a 32-bit four-character code.
     @objc public private( set ) dynamic var key:      UInt32
+
+    /// The SMC value type code, as a 32-bit four-character code.
     @objc public private( set ) dynamic var type:     UInt32
+
+    /// The raw value bytes associated with the key.
     @objc public private( set ) dynamic var data:     Data
+
+    /// The key code rendered as a four-character string.
     @objc public private( set ) dynamic var keyName:  String
+
+    /// The type code rendered as a four-character string.
     @objc public private( set ) dynamic var typeName: String
+
+    /// The value decoded into a native type according to ``type``,
+    /// or `nil` when the type is not recognized.
     @objc public private( set ) dynamic var value:    Any?
 
+    /// Creates a data object and decodes its value.
+    ///
+    /// - Parameters:
+    ///   - key:  The SMC key code.
+    ///   - type: The SMC value type code.
+    ///   - data: The raw value bytes.
     @objc
     public init( key: UInt32, type: UInt32, data: Data )
     {

@@ -25,4 +25,6 @@
 import Foundation
 import SMC
 
+// Entry point of the `smc-dump` command-line tool: prints a formatted dump of
+// every SMC key to standard output.
 print( SMCDump.produce() )

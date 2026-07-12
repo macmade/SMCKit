@@ -24,12 +24,24 @@
 
 import Foundation
 
+/// Produces a formatted, human-readable dump of every SMC key.
+///
+/// The dump lists each key alongside its type, data length, decoded value and
+/// raw bytes, preceded by a header describing the machine.
 @objc
 public class SMCDump: NSObject
 {
+    /// Unavailable; `SMCDump` exposes only class methods.
     private override init()
     {}
 
+    /// Reads every SMC key and renders them as an aligned text table.
+    ///
+    /// The keys are sorted case-insensitively by name and each column is padded
+    /// to a common width. A machine-description header is prepended.
+    ///
+    /// - Returns: The formatted dump, or an empty string if no keys could be
+    ///   read.
     @objc
     public class func produce() -> String
     {
@@ -71,6 +83,11 @@ public class SMCDump: NSObject
         return "\( separator )\n\( header )\n\( separator )\n\( lines )"
     }
 
+    /// Builds the five column strings describing a single key.
+    ///
+    /// - Parameter data: The key/value pair to describe.
+    /// - Returns: A tuple of the key name, type name, data length, decoded
+    ///   value and raw byte string.
     private class func description( for data: SMCData ) -> ( String, String, String, String, String )
     {
         (
@@ -82,6 +99,14 @@ public class SMCDump: NSObject
         )
     }
 
+    /// Renders a key's decoded value as a display string.
+    ///
+    /// Integers are printed as-is, floating-point values with two decimals,
+    /// flags as `True`/`False`, and C strings via their printable form. Unknown
+    /// types yield an empty string.
+    ///
+    /// - Parameter data: The key/value pair whose value to render.
+    /// - Returns: The value's display string.
     private class func valueDescription( for data: SMCData ) -> String
     {
         switch data.typeName
@@ -108,6 +133,11 @@ public class SMCDump: NSObject
         }
     }
 
+    /// Renders a key's raw bytes as an uppercase hexadecimal string.
+    ///
+    /// - Parameter data: The key/value pair whose bytes to render.
+    /// - Returns: The concatenated two-digit hexadecimal representation of each
+    ///   byte.
     private class func dataDescription( for data: SMCData ) -> String
     {
         var string = ""
@@ -120,6 +150,10 @@ public class SMCDump: NSObject
         return string
     }
 
+    /// Renders a key's data length with the correct singular/plural unit.
+    ///
+    /// - Parameter data: The key/value pair whose length to describe.
+    /// - Returns: A string such as `"1 byte"` or `"4 bytes"`.
     private class func dataLengthDescription( for data: SMCData ) -> String
     {
         if data.data.count == 1
@@ -130,6 +164,9 @@ public class SMCDump: NSObject
         return "\( data.data.count ) bytes"
     }
 
+    /// Builds the lines of the dump header.
+    ///
+    /// - Returns: The title, a blank spacer line, and the machine-detail lines.
     private class func header() -> [ String ]
     {
         [
@@ -143,6 +180,9 @@ public class SMCDump: NSObject
         }
     }
 
+    /// Formats the machine details as aligned `label: value` lines.
+    ///
+    /// - Returns: One padded line per machine detail.
     private class func headerParts() -> [ String ]
     {
         let all = MachineDetails.all
