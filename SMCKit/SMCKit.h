@@ -22,5 +22,12 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
+/*!
+ * @header      SMCKit.h
+ * @abstract    The umbrella header for the SMCKit framework.
+ * @discussion  Imports the framework's public Objective-C interfaces so that
+ *              clients can access them through a single @c \@import SMCKit; .
+ */
+
 #import <SMCKit/SMC.h>
 #import <SMCKit/SMCException.h>

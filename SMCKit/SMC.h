@@ -24,15 +24,53 @@
 
 #import <Foundation/Foundation.h>
 
+/*!
+ * @class       SMCData
+ * @abstract    Represents a single key/value pair read from the SMC.
+ * @discussion  Forward-declared here and implemented in Swift; it carries the
+ *              key code, its type code and the raw value bytes.
+ */
 @class SMCData;
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*!
+ * @class       SMC
+ * @abstract    A high-level interface for reading keys from the macOS System
+ *              Management Controller (SMC).
+ * @discussion  The SMC exposes hundreds of keys describing hardware sensors and
+ *              state (temperatures, fan speeds, voltages, power, ...). This
+ *              class opens a connection to the @c AppleSMC IOKit service and
+ *              enumerates and reads those keys.
+ */
 @interface SMC: NSObject
 
+/*!
+ * @property    shared
+ * @abstract    A lazily-created, process-wide shared instance.
+ * @discussion  The shared instance opens its SMC connection on first access.
+ */
 @property( class, nonatomic, readonly ) SMC * shared;
 
+/*!
+ * @method      init
+ * @abstract    Creates a new instance and opens a connection to the SMC.
+ * @return      An initialized @c SMC instance.
+ * @discussion  Prefer @c shared unless a dedicated connection is required.
+ */
 - ( instancetype )init;
+
+/*!
+ * @method      readAllKeys:
+ * @abstract    Reads the value of every SMC key, optionally filtered.
+ * @param       filter An optional block invoked with each key code; return
+ *                     @c YES to include the key or @c NO to skip it. Pass
+ *                     @c nil to read every key.
+ * @return      An array of @c SMCData objects for the keys that were read
+ *              successfully, or an empty array if the SMC connection is not
+ *              open. Keys that fail to read are silently skipped.
+ * @discussion  The set of key codes is enumerated and cached on the first call.
+ */
 - ( NSArray< SMCData * > *  )readAllKeys: ( BOOL ( ^ _Nullable )( uint32_t ) )filter;
 
 @end

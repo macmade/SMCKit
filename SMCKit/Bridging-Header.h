@@ -22,5 +22,12 @@
  * THE SOFTWARE.
  ******************************************************************************/
 
+/*!
+ * @header      Bridging-Header.h
+ * @abstract    The Objective-C bridging header for the SMCKit Swift sources.
+ * @discussion  Imports the Objective-C interfaces that need to be visible to
+ *              the framework's Swift code.
+ */
+
 #import "SMCException.h"
 #import "SMC.h"

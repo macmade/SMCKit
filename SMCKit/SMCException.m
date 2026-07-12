@@ -32,6 +32,17 @@
 
 @implementation SMCException
 
+/*!
+ * @method      doTry:error:
+ * @abstract    Executes a block, capturing any Objective-C exception as an error.
+ * @param       block The block to execute. Passing @c NULL is a no-op that
+ *                    succeeds.
+ * @param       error On return, if an exception was caught, set to an
+ *                    @c NSError built from the exception via @c SMCHelper. May
+ *                    be @c NULL.
+ * @return      @c YES if the block completed without raising an exception,
+ *              otherwise @c NO.
+ */
 + ( BOOL )doTry: ( void ( ^ )( void ) )block error: ( NSError * __autoreleasing * )error
 {
     if( block == NULL )

@@ -34,7 +34,17 @@
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wfour-char-constants"
 
+/*!
+ * @const       kSMCKeyNKEY
+ * @abstract    The @c '#KEY' key, whose value holds the total number of SMC
+ *              keys.
+ */
 const uint32_t kSMCKeyNKEY = '#KEY';
+
+/*!
+ * @const       kSMCKeyACID
+ * @abstract    The @c 'ACID' key, identifying the AC power adapter information.
+ */
 const uint32_t kSMCKeyACID = 'ACID';
 
 #pragma clang diagnostic push
@@ -43,17 +53,98 @@ const uint32_t kSMCKeyACID = 'ACID';
 
 NS_ASSUME_NONNULL_BEGIN
 
+/*!
+ * @category    SMC()
+ * @abstract    Private interface holding the SMC connection state and the
+ *              low-level IOKit communication primitives.
+ */
 @interface SMC()
 
+/*!
+ * @property    connection
+ * @abstract    The IOKit connection to the @c AppleSMC service, or
+ *              @c IO_OBJECT_NULL when no connection is open.
+ */
 @property( nonatomic, readwrite, assign ) io_connect_t                                   connection;
+
+/*!
+ * @property    keys
+ * @abstract    The cached list of SMC key codes, boxed as @c NSNumber values.
+ * @discussion  Populated lazily on the first call to @c readAllKeys:.
+ */
 @property( nonatomic, readwrite, strong ) NSMutableArray< NSNumber * >                 * keys;
+
+/*!
+ * @property    keyInfoCache
+ * @abstract    A cache mapping key codes to their @c SMCKeyInfoData metadata.
+ * @discussion  Each value is an @c NSValue wrapping a heap-allocated
+ *              @c SMCKeyInfoData pointer, avoiding repeated SMC round-trips.
+ */
 @property( nonatomic, readwrite, strong ) NSMutableDictionary< NSNumber *, NSValue * > * keyInfoCache;
 
+/*!
+ * @method      callSMCFunction:input:output:
+ * @abstract    Performs a single structured call against the SMC user client.
+ * @param       function The SMC selector to invoke (e.g. @c kSMCHandleYPCEvent).
+ * @param       input    The populated request structure.
+ * @param       output   On return, the response structure from the SMC.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Opens the user client, dispatches the structured call and closes
+ *              the user client around the request.
+ */
 - ( BOOL )callSMCFunction: ( uint32_t )function input: ( const SMCParamStruct * )input output: ( SMCParamStruct * )output;
+
+/*!
+ * @method      readSMCKeyInfo:forKey:
+ * @abstract    Retrieves the metadata (size, type, attributes) for a key.
+ * @param       info On return, the metadata for the key.
+ * @param       key  The key code to query.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Results are cached in @c keyInfoCache and served from there on
+ *              subsequent calls for the same key.
+ */
 - ( BOOL )readSMCKeyInfo: ( SMCKeyInfoData * )info forKey: ( uint32_t )key;
+
+/*!
+ * @method      readSMCKey:atIndex:
+ * @abstract    Retrieves the key code located at a given enumeration index.
+ * @param       key   On return, the key code at the requested index.
+ * @param       index The zero-based index into the SMC key table.
+ * @return      @c YES on success, otherwise @c NO.
+ */
 - ( BOOL )readSMCKey: ( uint32_t * )key atIndex: ( uint32_t )index;
+
+/*!
+ * @method      readSMCKey:buffer:maxSize:keyInfo:
+ * @abstract    Reads the raw value of a key into a caller-provided buffer.
+ * @param       key     The key code to read.
+ * @param       buffer  The destination buffer for the value bytes.
+ * @param       maxSize On input, the capacity of @c buffer; on output, the
+ *                      number of bytes written.
+ * @param       keyInfo On return, the key's metadata. May be @c NULL.
+ * @return      @c YES on success, otherwise @c NO (including when @c buffer is
+ *              too small to hold the value).
+ * @discussion  Value bytes are byte-swapped from the SMC's big-endian ordering,
+ *              except for @c kSMCKeyACID which is copied verbatim.
+ */
 - ( BOOL )readSMCKey: ( uint32_t )key buffer: ( uint8_t * )buffer maxSize: ( uint32_t * )maxSize keyInfo: ( SMCKeyInfoData * _Nullable )keyInfo;
+
+/*!
+ * @method      readSMCKeyCount
+ * @abstract    Reads the total number of keys exposed by the SMC.
+ * @return      The number of keys, or @c 0 on failure.
+ * @discussion  Reads and decodes the value of the @c kSMCKeyNKEY key.
+ */
 - ( uint32_t )readSMCKeyCount;
+
+/*!
+ * @method      readInteger:size:
+ * @abstract    Decodes a little-endian unsigned integer from a byte buffer.
+ * @param       data The buffer holding the value bytes.
+ * @param       size The number of bytes to decode; must not exceed
+ *                   @c sizeof( uint32_t ).
+ * @return      The decoded value, or @c 0 if @c size is too large.
+ */
 - ( uint32_t )readInteger: ( uint8_t * )data size: ( uint32_t )size;
 
 @end
@@ -62,6 +153,11 @@ NS_ASSUME_NONNULL_END
 
 @implementation SMC
 
+/*!
+ * @method      shared
+ * @abstract    Returns the lazily-created, process-wide shared instance.
+ * @return      The shared @c SMC instance.
+ */
 + ( SMC * )shared
 {
     static dispatch_once_t once;
@@ -79,6 +175,13 @@ NS_ASSUME_NONNULL_END
     return instance;
 }
 
+/*!
+ * @method      init
+ * @abstract    Initializes the instance and opens its SMC connection.
+ * @return      An initialized @c SMC instance.
+ * @discussion  Allocates the key and key-info caches and attempts to open the
+ *              connection to the @c AppleSMC service.
+ */
 - ( instancetype )init
 {
     if( ( self = [ super init ] ) )
@@ -92,11 +195,26 @@ NS_ASSUME_NONNULL_END
     return self;
 }
 
+/*!
+ * @method      dealloc
+ * @abstract    Closes the SMC connection when the instance is deallocated.
+ */
 - ( oneway void )dealloc
 {
     [ self close ];
 }
 
+/*!
+ * @method      readAllKeys:
+ * @abstract    Reads the value of every SMC key, optionally filtered.
+ * @param       filter An optional block invoked with each key code; return
+ *                     @c YES to include the key or @c NO to skip it. Pass
+ *                     @c nil to read every key.
+ * @return      An array of @c SMCData objects for the keys read successfully,
+ *              or an empty array if the connection is not open.
+ * @discussion  On the first call the key table is enumerated and cached in
+ *              @c keys. Keys that fail to read are skipped.
+ */
 - ( NSArray< SMCData * > *  )readAllKeys: ( BOOL ( ^ _Nullable )( uint32_t ) )filter
 {
     if( self.connection == IO_OBJECT_NULL )
@@ -150,6 +268,14 @@ NS_ASSUME_NONNULL_END
     return items;
 }
 
+/*!
+ * @method      open:
+ * @abstract    Opens the connection to the @c AppleSMC IOKit service.
+ * @param       error On failure, set to an @c NSError describing the problem.
+ *                    May be @c NULL.
+ * @return      @c YES if the connection is open (or was already open),
+ *              otherwise @c NO.
+ */
 - ( BOOL )open: ( NSError * _Nullable __autoreleasing * )error
 {
     if( self.connection != IO_OBJECT_NULL )
@@ -187,6 +313,12 @@ NS_ASSUME_NONNULL_END
     return YES;
 }
 
+/*!
+ * @method      close
+ * @abstract    Closes the connection to the @c AppleSMC IOKit service.
+ * @return      @c YES if the connection is closed (or was already closed),
+ *              otherwise @c NO.
+ */
 - ( BOOL )close
 {
     if( self.connection == IO_OBJECT_NULL )
@@ -204,6 +336,16 @@ NS_ASSUME_NONNULL_END
     return YES;
 }
 
+/*!
+ * @method      callSMCFunction:input:output:
+ * @abstract    Performs a single structured call against the SMC user client.
+ * @param       function The SMC selector to invoke (e.g. @c kSMCHandleYPCEvent).
+ * @param       input    The populated request structure.
+ * @param       output   On return, the response structure from the SMC.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Opens the user client, dispatches the structured call and closes
+ *              the user client around the request.
+ */
 - ( BOOL )callSMCFunction: ( uint32_t )function input: ( const SMCParamStruct * )input output: ( SMCParamStruct * )output
 {
     size_t        inputSize  = sizeof( SMCParamStruct );
@@ -222,6 +364,15 @@ NS_ASSUME_NONNULL_END
     return result == kIOReturnSuccess;
 }
 
+/*!
+ * @method      readSMCKeyInfo:forKey:
+ * @abstract    Retrieves the metadata (size, type, attributes) for a key.
+ * @param       info On return, the metadata for the key.
+ * @param       key  The key code to query.
+ * @return      @c YES on success, otherwise @c NO.
+ * @discussion  Results are cached in @c keyInfoCache; a cached entry is served
+ *              without contacting the SMC.
+ */
 - ( BOOL )readSMCKeyInfo: ( SMCKeyInfoData * )info forKey: ( uint32_t )key
 {
     if( info == NULL || key == 0 )
@@ -274,6 +425,13 @@ NS_ASSUME_NONNULL_END
     return YES;
 }
 
+/*!
+ * @method      readSMCKey:atIndex:
+ * @abstract    Retrieves the key code located at a given enumeration index.
+ * @param       key   On return, the key code at the requested index.
+ * @param       index The zero-based index into the SMC key table.
+ * @return      @c YES on success, otherwise @c NO.
+ */
 - ( BOOL )readSMCKey: ( uint32_t * )key atIndex: ( uint32_t )index
 {
     if( key == NULL )
@@ -305,6 +463,20 @@ NS_ASSUME_NONNULL_END
     return YES;
 }
 
+/*!
+ * @method      readSMCKey:buffer:maxSize:keyInfo:
+ * @abstract    Reads the raw value of a key into a caller-provided buffer.
+ * @param       key     The key code to read.
+ * @param       buffer  The destination buffer for the value bytes.
+ * @param       maxSize On input, the capacity of @c buffer; on output, the
+ *                      number of bytes written.
+ * @param       keyInfo On return, the key's metadata. May be @c NULL.
+ * @return      @c YES on success, otherwise @c NO (including when @c buffer is
+ *              too small to hold the value).
+ * @discussion  The value bytes are reversed from the SMC's big-endian ordering
+ *              into little-endian, except for @c kSMCKeyACID which is copied
+ *              verbatim.
+ */
 - ( BOOL )readSMCKey: ( uint32_t )key buffer: ( uint8_t * )buffer maxSize: ( uint32_t * )maxSize keyInfo: ( SMCKeyInfoData * _Nullable )keyInfo
 {
     if( key == 0 || buffer == NULL || maxSize == NULL )
@@ -368,6 +540,12 @@ NS_ASSUME_NONNULL_END
     return YES;
 }
 
+/*!
+ * @method      readSMCKeyCount
+ * @abstract    Reads the total number of keys exposed by the SMC.
+ * @return      The number of keys, or @c 0 on failure.
+ * @discussion  Reads the value of @c kSMCKeyNKEY and decodes it as an integer.
+ */
 - ( uint32_t )readSMCKeyCount
 {
     uint8_t  data[ 8 ];
@@ -383,6 +561,14 @@ NS_ASSUME_NONNULL_END
     return [ self readInteger: data size: size ];
 }
 
+/*!
+ * @method      readInteger:size:
+ * @abstract    Decodes a little-endian unsigned integer from a byte buffer.
+ * @param       data The buffer holding the value bytes.
+ * @param       size The number of bytes to decode; must not exceed
+ *                   @c sizeof( uint32_t ).
+ * @return      The decoded value, or @c 0 if @c size is too large.
+ */
 - ( uint32_t )readInteger: ( uint8_t * )data size: ( uint32_t )size
 {
     uint32_t n = 0;
