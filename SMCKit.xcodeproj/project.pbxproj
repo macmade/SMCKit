@@ -29,6 +29,7 @@
 		05BD7475299408E200CF4FD7 /* SMCHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD7473299408E200CF4FD7 /* SMCHelper.swift */; };
 		0FCE0000000000000000000E /* SMCHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE0000000000000000000C /* SMCHelperTests.swift */; };
 		0FCE0000000000000000000F /* SMCDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE0000000000000000000D /* SMCDataTests.swift */; };
+		0FCE00000000000000000012 /* SMCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000011 /* SMCTests.swift */; };
 		0FCE00000000000000000010 /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD7282299275AB00CF4FD7 /* SMCKit.framework */; };
 /* End PBXBuildFile section */
 
@@ -131,6 +132,7 @@
 		0FCE00000000000000000008 /* SMCKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SMCKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0FCE0000000000000000000C /* SMCHelperTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCHelperTests.swift; sourceTree = "<group>"; };
 		0FCE0000000000000000000D /* SMCDataTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCDataTests.swift; sourceTree = "<group>"; };
+		0FCE00000000000000000011 /* SMCTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SMCTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -359,6 +361,7 @@
 			children = (
 				0FCE0000000000000000000C /* SMCHelperTests.swift */,
 				0FCE0000000000000000000D /* SMCDataTests.swift */,
+				0FCE00000000000000000011 /* SMCTests.swift */,
 			);
 			path = SMCKitTests;
 			sourceTree = "<group>";
@@ -566,6 +569,7 @@
 			files = (
 				0FCE0000000000000000000E /* SMCHelperTests.swift in Sources */,
 				0FCE0000000000000000000F /* SMCDataTests.swift in Sources */,
+				0FCE00000000000000000012 /* SMCTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

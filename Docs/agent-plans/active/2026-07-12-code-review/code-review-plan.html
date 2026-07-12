@@ -295,7 +295,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 3 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-medium">Finding 2 · Medium</span>
         <h3>3. Serialize the process-wide <code>shared</code> SMC instance</h3>
     </div>
@@ -312,10 +312,27 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Approach — serial queue at a single outer boundary.</strong> Used a per-instance serial <code>dispatch_queue_t queue</code> created in <code>-init</code> rather than <code>@synchronized</code>. Rationale: <code>readAllKeys:</code> is the <em>only</em> public multi-step entry point (<code>SMC.h</code> exposes just <code>+shared</code>, <code>-init</code>, <code>-readAllKeys:</code>), and every SMC access funnels through its deep call chain (<code>readAllKeys:</code> → <code>readSMCKeyCount</code> / <code>readSMCKey:atIndex:</code> / <code>readSMCKey:buffer:maxSize:keyInfo:</code> → <code>readSMCKeyInfo:forKey:</code> / <code>callSMCFunction:input:output:</code>). Serializing at that single boundary transitively serializes all access to <code>keys</code>, <code>keyInfoCache</code> and <code>connection</code> — the "single, outer boundary" the plan explicitly permits.</p>
+        <ul>
+            <li><code>SMCKit/SMC.m</code> — added the serial <code>queue</code> property (created in <code>-init</code>). Kept the original <code>readAllKeys:</code> body verbatim as a new private <code>readAllKeysUnsynchronized:</code> worker; <code>readAllKeys:</code> is now a thin wrapper that <code>dispatch_sync</code>s onto <code>queue</code> and delegates. No nested <code>dispatch_sync</code> exists anywhere in the chain, so re-entrant deadlock is impossible.</li>
+            <li><code>open:</code>/<code>close</code> left unsynchronized by design: both are private and mutate <code>connection</code> only from <code>-init</code>/<code>-dealloc</code> (lifecycle-bound — an instance cannot be deallocated while another thread is executing one of its methods). See the deferred Info note below.</li>
+            <li><code>SMCKit/SMC.h</code> — documented the concurrency contract on the class discussion and on <code>readAllKeys:</code>; the internal <code>queue</code> and worker doc comments state the serialization/queue-affinity rules.</li>
+            <li><code>SMCKitTests/SMCTests.swift</code> — new <code>SMC</code> suite with a concurrency regression test hammering <code>SMC.shared.readAllKeys()</code> from 16 concurrent tasks and asserting all complete. Hardware-independent (returns empty arrays where no SMC connection exists, so it is CI-safe) yet exercises the serialized paths. Registered in <code>SMCKit.xcodeproj</code> (PBXBuildFile / PBXFileReference / group / Sources phase, fresh non-colliding IDs). No SwiftPM manifest exists, so only the Xcode project needed updating.</li>
+        </ul>
+        <p><strong>TDD via Thread Sanitizer (real red→green).</strong> A plain test cannot deterministically fail on a data race, so the concurrency test was run under TSan against the <em>current</em> code: TSan reported a genuine data race on <code>NSMutableDictionary</code> (<code>-[__NSDictionaryM setObject:forKeyedSubscript:]</code>, i.e. <code>self.keyInfoCache</code>) — <strong>red</strong>. After adding the serialization the same test under TSan reported <strong>0 data races</strong> — <strong>green</strong>.</p>
+        <p><strong>Verification.</strong> Full suite <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>24/24 passed</strong> (23 existing + the new concurrency test), no regressions. Clean <code>build</code> with the project's <code>-Wdocumentation -Werror</code> after the doc edits. Temporary build artifacts removed. Left the lowercase <code>return false;</code> in <code>-close</code> untouched — it belongs to Milestone&nbsp;9.</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged. A fresh-context reviewer traced the full call chain (confirmed deadlock-freedom), verified completeness of the serialization, the wrapper/queue correctness, the pbxproj (<code>plutil -lint</code> OK, unique IDs), test effectiveness and CI-robustness, and found no regressions. No Critical/High/Medium findings.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, no Critical/High/Medium findings. Two Info observations:</p>
+        <ul>
+            <li><span class="sev sev-info">Info</span> <strong>Load-bearing invariant for unsynchronized <code>open:</code>/<code>close</code></strong> — their off-queue safety rests on "<code>connection</code> is mutated only from <code>-init</code>/<code>-dealloc</code>." Correct today (enforced by private visibility). If a future milestone adds a reconnect/close path, the <code>connection</code> accesses in <code>callSMCFunction:</code> and the worker must also be brought under <code>queue</code>. <em>Deferred — no action now; invariant to preserve deliberately.</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>Doc-abstract imprecision</strong> — the <code>readAllKeysUnsynchronized:</code> abstract in <code>SMC.m</code> read "on the serial queue" (it must be <em>called</em> on the queue, it does not run itself). <em>Fixed — abstract reworded to "must be called on the serial queue".</em></li>
+        </ul>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 

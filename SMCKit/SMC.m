@@ -83,6 +83,31 @@ NS_ASSUME_NONNULL_BEGIN
 @property( nonatomic, readwrite, strong ) NSMutableDictionary< NSNumber *, NSValue * > * keyInfoCache;
 
 /*!
+ * @property    queue
+ * @abstract    The serial queue that serializes access to the instance's
+ *              mutable state and its user-client connection.
+ * @discussion  Created in @c -init. The public @c readAllKeys: entry point
+ *              dispatches its work synchronously onto this queue, so concurrent
+ *              callers of the same instance - in particular the process-wide
+ *              @c shared instance - cannot race on @c keys, @c keyInfoCache or
+ *              @c connection, nor interleave on the single user-client session.
+ */
+@property( nonatomic, readwrite, strong ) dispatch_queue_t queue;
+
+/*!
+ * @method      readAllKeysUnsynchronized:
+ * @abstract    Implements @c readAllKeys: without acquiring @c queue.
+ * @param       filter The optional per-key filter block; see @c readAllKeys:.
+ * @return      The array of decoded @c SMCData objects.
+ * @discussion  Must only be called from within a block running on @c queue.
+ *              @c readAllKeys: is the single synchronization boundary; every SMC
+ *              access it triggers already runs on @c queue, so the private
+ *              helpers it calls do not lock again and cannot deadlock
+ *              re-entrantly.
+ */
+- ( NSArray< SMCData * > *  )readAllKeysUnsynchronized: ( BOOL ( ^ _Nullable )( uint32_t ) )filter;
+
+/*!
  * @method      callSMCFunction:input:output:
  * @abstract    Performs a single structured call against the SMC user client.
  * @param       function The SMC selector to invoke (e.g. @c kSMCHandleYPCEvent).
@@ -188,6 +213,7 @@ NS_ASSUME_NONNULL_END
     {
         self.keys         = [ NSMutableArray new ];
         self.keyInfoCache = [ NSMutableDictionary new ];
+        self.queue        = dispatch_queue_create( "com.xs-labs.SMCKit.SMC", DISPATCH_QUEUE_SERIAL );
 
         [ self open: nil ];
     }
@@ -213,9 +239,36 @@ NS_ASSUME_NONNULL_END
  * @return      An array of @c SMCData objects for the keys read successfully,
  *              or an empty array if the connection is not open.
  * @discussion  On the first call the key table is enumerated and cached in
- *              @c keys. Keys that fail to read are skipped.
+ *              @c keys. Keys that fail to read are skipped. Access is
+ *              serialized on a per-instance serial queue, so this method is
+ *              safe to call concurrently - including on @c shared. Concurrent
+ *              calls on the same instance are serialized and may block.
  */
 - ( NSArray< SMCData * > *  )readAllKeys: ( BOOL ( ^ _Nullable )( uint32_t ) )filter
+{
+    __block NSArray< SMCData * > * items = @[];
+
+    dispatch_sync
+    (
+        self.queue,
+        ^( void )
+        {
+            items = [ self readAllKeysUnsynchronized: filter ];
+        }
+    );
+
+    return items;
+}
+
+/*!
+ * @method      readAllKeysUnsynchronized:
+ * @abstract    Implements @c readAllKeys:; must be called on the serial
+ *              @c queue.
+ * @param       filter The optional per-key filter block; see @c readAllKeys:.
+ * @return      An array of @c SMCData objects for the keys read successfully,
+ *              or an empty array if the connection is not open.
+ */
+- ( NSArray< SMCData * > *  )readAllKeysUnsynchronized: ( BOOL ( ^ _Nullable )( uint32_t ) )filter
 {
     if( self.connection == IO_OBJECT_NULL )
     {

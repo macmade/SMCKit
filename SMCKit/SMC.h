@@ -42,6 +42,12 @@ NS_ASSUME_NONNULL_BEGIN
  *              state (temperatures, fan speeds, voltages, power, ...). This
  *              class opens a connection to the @c AppleSMC IOKit service and
  *              enumerates and reads those keys.
+ *
+ *              Each instance serializes access to its own connection and
+ *              internal caches, so an instance - including the process-wide
+ *              @c shared instance - may be used from multiple threads
+ *              concurrently. Calls on the same instance are serialized, so a
+ *              concurrent call may block until an in-progress one completes.
  */
 @interface SMC: NSObject
 
@@ -70,6 +76,8 @@ NS_ASSUME_NONNULL_BEGIN
  *              successfully, or an empty array if the SMC connection is not
  *              open. Keys that fail to read are silently skipped.
  * @discussion  The set of key codes is enumerated and cached on the first call.
+ *              Safe to call concurrently; see the class discussion for the
+ *              serialization contract.
  */
 - ( NSArray< SMCData * > *  )readAllKeys: ( BOOL ( ^ _Nullable )( uint32_t ) )filter;
 
