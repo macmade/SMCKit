@@ -567,7 +567,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 9 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-info">Finding 8 · Info</span>
         <h3>9. Use <code>NO</code> for consistency in <code>-close</code></h3>
     </div>
@@ -581,10 +581,17 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>One-token consistency fix in <code>SMCKit/SMC.m</code>.</strong> Changed the single lowercase <code>return false;</code> on the <code>IOServiceClose(...) != kIOReturnSuccess</code> failure path inside <code>- ( BOOL )close</code> (line 413) to <code>return NO;</code>, matching the Objective-C <code>YES</code>/<code>NO</code> convention used everywhere else in the method and the file. <code>NO</code> is <code>(BOOL)0</code> and <code>false</code> is <code>0</code>, so this is a pure spelling change with no behavioral difference; no other line was touched.</p>
+        <p><strong>TDD note.</strong> Not applicable — <code>false</code> and <code>NO</code> are the identical value, so there is no observable behavior to write a failing test against. The plan's own tasks call only for a build to confirm no behavioral change.</p>
+        <p><strong>Verification.</strong> Clean <code>build</code> under <code>-Wdocumentation -Werror</code>, no warnings. Full suite <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>33/33 passed</strong> (no regression). Working tree limited to <code>SMCKit/SMC.m</code>.</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged with <em>no findings</em>. A fresh-context reviewer confirmed the change is exactly the intended one line, behaviorally equivalent (<code>BOOL</code> return type, no caller could observe a distinction), the surrounding <code>-close</code> logic is intact, and a word-boundary search shows <strong>no remaining lowercase <code>true</code>/<code>false</code></strong> anywhere in <code>SMC.m</code> — the consistency goal is fully met by the one-line scope.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, <strong>no findings</strong> (no Critical/High/Medium/Low/Info). Verified the exact one-line change, behavioral equivalence, untouched surrounding logic, and that no stray <code>true</code>/<code>false</code> remains in the file.</p>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 

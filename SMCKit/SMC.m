@@ -410,7 +410,7 @@ NS_ASSUME_NONNULL_END
 
     if( IOServiceClose( self.connection ) != kIOReturnSuccess )
     {
-        return false;
+        return NO;
     }
 
     self.connection = IO_OBJECT_NULL;
