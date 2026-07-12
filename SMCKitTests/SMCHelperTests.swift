@@ -169,6 +169,39 @@ struct SMCHelperTests
         #expect( SMCHelper.value( for: Data( [ 0x42, 0x41 ] ), type: 0x6368382A ) as? String == "AB" ) // "ch8*"
     }
 
+    /// The multi-byte types are decoded correctly from the *reversed*
+    /// (little-endian) buffers that `SMC.m` hands to ``SMCHelper/value(for:type:)``.
+    ///
+    /// The `flt`/`ioft` samples are real post-reversal buffers read from an
+    /// Apple Silicon SMC (their decoded values are physically-correct sensor
+    /// readings). This test is the regression guard for the `flt`/`ioft` byte
+    /// order: applying a `.byteSwapped` compensation to those cases — as a
+    /// naive symmetry argument with the integer cases would suggest — turns
+    /// each of these into an IEEE denormal or an absurd magnitude and fails
+    /// here. The integer and `sp78` cases round out the previously-untested
+    /// `value(for:type:)` path for the reversed multi-byte types.
+    @Test( "value decodes reversed multi-byte buffers" )
+    func valueDecodesReversedMultiByteTypes()
+    {
+        // flt: real post-reversal buffers, chosen for exact representation.
+        #expect( SMCHelper.value( for: Data( [ 0x42, 0x10, 0x00, 0x00 ] ), type: 0x666C7420 ) as? Float ==  36.0 )  // TDBP
+        #expect( SMCHelper.value( for: Data( [ 0x42, 0xC8, 0x00, 0x00 ] ), type: 0x666C7420 ) as? Float == 100.0 )  // ceU0
+        #expect( SMCHelper.value( for: Data( [ 0xC2, 0xC8, 0x00, 0x00 ] ), type: 0x666C7420 ) as? Float == -100.0 ) // cmDd
+
+        // ioft: real post-reversal buffers (whole-degree temperature readings).
+        #expect( SMCHelper.value( for: Data( [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x22, 0x00, 0x00 ] ), type: 0x696F6674 ) as? Double == 34.0 ) // TG0H
+        #expect( SMCHelper.value( for: Data( [ 0x00, 0x00, 0x00, 0x00, 0x00, 0x21, 0x00, 0x00 ] ), type: 0x696F6674 ) as? Double == 33.0 ) // TG0C
+
+        // Unsigned integers: value() reverses relative to the raw helper, so a
+        // reversed buffer decodes to the natural big-endian value.
+        #expect( SMCHelper.value( for: Data( [ 0x34, 0x12 ] ),                                     type: 0x75693136 ) as? UInt16 == 0x1234 )             // ui16
+        #expect( SMCHelper.value( for: Data( [ 0x78, 0x56, 0x34, 0x12 ] ),                         type: 0x75693332 ) as? UInt32 == 0x12345678 )         // ui32
+        #expect( SMCHelper.value( for: Data( [ 0x08, 0x07, 0x06, 0x05, 0x04, 0x03, 0x02, 0x01 ] ), type: 0x75693634 ) as? UInt64 == 0x0102030405060708 ) // ui64
+
+        // sp78: same helper as the raw path, compensating through its indexing.
+        #expect( SMCHelper.value( for: Data( [ 0x00, 0x19 ] ), type: 0x73703738 ) as? Double == 25.0 ) // sp78
+    }
+
     /// An unrecognized type code decodes to `nil`.
     @Test( "value returns nil for an unknown type" )
     func valueForUnknownType()

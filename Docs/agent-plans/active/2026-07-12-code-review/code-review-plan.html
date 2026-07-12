@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMCKit — Code Review Implementation Plan</title>
+<style>
+    :root {
+        --bg:        #0d1117;
+        --bg-alt:    #161b22;
+        --bg-code:   #1c2128;
+        --border:    #30363d;
+        --text:      #e6edf3;
+        --text-dim:  #9da7b3;
+        --accent:    #58a6ff;
+        --mono:      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        font-size: 16px;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.5px; }
+    h2 {
+        font-size: 22px;
+        margin: 48px 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 18px; margin: 0 0 6px; }
+    h4 { font-size: 15px; margin: 16px 0 6px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+        font-family: var(--mono);
+        background: var(--bg-code);
+        padding: 1px 6px;
+        border-radius: 5px;
+        font-size: 0.88em;
+        color: #d2a8ff;
+    }
+    pre {
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    pre code { background: none; padding: 0; color: var(--text); }
+    .meta { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; }
+    .meta strong { color: var(--text); }
+    .panel {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 22px;
+    }
+    .capsule {
+        display: inline-block;
+        padding: 2px 12px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        vertical-align: middle;
+    }
+    .st-notstarted { background: #6e7681; color: #fff; }
+    .st-inprogress { background: #c9a227; color: #1a1400; }
+    .st-completed  { background: #2ea043; color: #fff; }
+    .sev {
+        display: inline-block;
+        padding: 1px 9px;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        text-transform: uppercase;
+        color: #fff;
+        vertical-align: middle;
+    }
+    .sev-high   { background: #e0752d; }
+    .sev-medium { background: #c9a227; color: #1a1400; }
+    .sev-low    { background: #2f6feb; }
+    .sev-info   { background: #6e7681; }
+    .phase {
+        margin: 40px 0 8px;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--accent);
+    }
+    .milestone {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left-width: 4px;
+        border-left-color: var(--accent);
+        border-radius: 10px;
+        padding: 18px 22px;
+        margin: 18px 0;
+    }
+    .milestone.blocked { border-left-color: #d1242f; }
+    .m-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+    .m-head h3 { flex: 1 1 auto; min-width: 240px; }
+    .field { margin: 14px 0 0; }
+    .label { color: var(--text-dim); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; display: block; margin-bottom: 4px; }
+    .placeholder { color: var(--text-dim); font-style: italic; }
+    ul { padding-left: 22px; margin: 6px 0; }
+    ol { padding-left: 22px; margin: 6px 0; }
+    li { margin: 4px 0; }
+    .checklist { list-style: none; padding-left: 4px; }
+    .checklist li::before { content: "☐"; margin-right: 8px; color: var(--text-dim); }
+    .kv { color: var(--text-dim); font-size: 14px; }
+    .kv strong { color: var(--text); }
+    hr { border: none; border-top: 1px solid var(--border); margin: 32px 0; }
+    .note { border-top: 1px dashed var(--border); margin-top: 14px; padding-top: 12px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SMCKit — Code Review Implementation Plan</h1>
+<div class="meta">
+    <strong>Generated:</strong> 2026-07-12 &nbsp;·&nbsp;
+    <strong>Source:</strong> <code>Docs/agent-plans/active/2026-07-12-code-review/code-review.html</code>
+</div>
+
+<h2>Overview</h2>
+<div class="panel">
+    <p style="margin-top:0">
+        This plan turns the ten findings from the SMCKit code review into small, individually
+        reviewable and committable milestones. The review rated the codebase's overall quality as
+        good; the work here is targeted remediation rather than a rewrite. The findings span one
+        high-severity value-decoding correctness bug, one medium-severity thread-safety gap, and a
+        set of low/info robustness, leak, performance, and style items.
+    </p>
+    <p>
+        The milestones are grouped into four phases: <strong>Correctness</strong> (the
+        <code>flt</code>/<code>ioft</code> byte-order bug), <strong>Stability &amp; memory</strong>
+        (thread-safety, the key-info cache leak, and the per-call open/close), <strong>Robustness</strong>
+        (the <code>system_profiler</code> regex and the <code>Task</code> output capture), and
+        <strong>Minor correctness &amp; style</strong>. The headline byte-order bug is deliberately
+        split into a hardware-verification milestone that gates the actual code change, because the
+        correct byte order must be confirmed against a known-good read on real hardware before any
+        decode logic is altered. Per the project conventions, the Xcode project and the Swift package
+        are both kept in sync, and tests are run through <code>xcodebuild</code> against the
+        <code>SMCKit</code> scheme.
+    </p>
+</div>
+
+<h2>Questions &amp; answers</h2>
+<div class="panel">
+    <p style="margin-top:0"><strong>Q. Finding 1 (flt/ioft byte order) is the headline correctness bug and the review recommends confirming the intended byte order against a known-good hardware read, which cannot be done in this environment. How should the plan treat it?</strong></p>
+    <p>A. Hardware-verify first: add a milestone to confirm the byte order on real hardware before changing any decode logic, and treat the fix as blocked until that verification is done.</p>
+
+    <p><strong>Q. Finding 2 is the process-wide <code>shared</code> instance not being thread-safe. Which approach should the plan take?</strong></p>
+    <p>A. Serialize access — wrap <code>readAllKeys:</code>, <code>readSMCKeyInfo:forKey:</code> and the <code>callSMCFunction:</code> open/call/close sequence in a per-instance serial queue (or <code>@synchronized</code>), and document the concurrency contract.</p>
+
+    <p><strong>Q. Findings 4 and 6 are performance/robustness items the review itself flags as uncertain or hardware-dependent. Include them in the plan?</strong></p>
+    <p>A. Include all — add milestones for findings 4 and 6 alongside the rest, treating finding 6 carefully given its hardware-dependent behavior.</p>
+
+    <p><strong>Q. Overall, which findings should the plan cover?</strong></p>
+    <p>A. All findings (1–10), grouped into reviewable milestones, subject to the per-finding decisions above.</p>
+</div>
+
+<h2>Notes</h2>
+<ul>
+    <li><span class="label" style="display:inline;text-transform:none;font-weight:600">Byte-order model.</span> <code>SMC.m -readSMCKey:buffer:maxSize:keyInfo:</code> (lines 528–538) reverses every value's bytes from the SMC's big-endian ordering into little-endian before handing them to Swift, with <code>kSMCKeyACID</code> as the sole exception. The integer cases in <code>SMCHelper.value(for:type:)</code> compensate with <code>.byteSwapped</code>; <code>sp78</code> compensates via its indexing; <code>flt</code>/<code>ioft</code> currently do not — that is finding 1.</li>
+    <li><span class="label" style="display:inline;text-transform:none;font-weight:600">Helpers vs. the <code>value()</code> path.</span> The standalone numeric helpers (<code>uint16</code>, <code>float32</code>, <code>ioFloat</code>, …) are documented and tested as big-endian decoders and are internally consistent. Existing tests in <code>SMCHelperTests</code> cover the helpers and the byte-order-independent <code>value()</code> cases only; no test exercises <code>value(for:type:)</code> for the reversed multi-byte types.</li>
+    <li><span class="label" style="display:inline;text-transform:none;font-weight:600">Key files.</span> <code>SMCKit/SMCHelper.swift</code> (decoders), <code>SMCKit/SMC.m</code> (IOKit access, cache, byte reversal), <code>SMCKit/MachineDetails.swift</code> (regex), <code>SMCKit/Task.swift</code> (process output), <code>SMCKit/SMCData.swift</code> and <code>SMCKit/SMCDump.swift</code> (value presentation), tests in <code>SMCKitTests/</code>.</li>
+    <li><span class="label" style="display:inline;text-transform:none;font-weight:600">Conventions.</span> One type per file, no force-unwraps, prefer <code>let</code>, prefer <code>map</code>/<code>filter</code>/<code>reduce</code> over raw loops, explicit <code>public</code> in the framework target, and doc comments on private members too. Keep the <code>.xcodeproj</code> and the SwiftPM manifest in sync; build and test via <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit</code>.</li>
+    <li><span class="label" style="display:inline;text-transform:none;font-weight:600">Hardware dependency.</span> Milestone&nbsp;1 and the on-hardware validation of Milestone&nbsp;5 must be run by the maintainer on a real Mac; they cannot be verified in a sandbox. Each is called out explicitly.</li>
+</ul>
+
+<!-- ============================ PHASE A ============================ -->
+<h2>Milestones</h2>
+<div class="phase">Phase A — Correctness</div>
+
+<!-- MILESTONE 1 -->
+<div class="milestone blocked">
+    <div class="m-head">
+        <span class="capsule st-completed">Completed</span>
+        <span class="sev sev-high">Finding 1 · High</span>
+        <h3>1. Verify the <code>flt</code>/<code>ioft</code> byte order on real hardware</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Establish, against a known-good reference, whether <code>flt</code> and <code>ioft</code> values need byte-swap compensation before the decode logic is touched. This milestone gates Milestone&nbsp;2 and must be run on a real Mac — it produces evidence, not code.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Identify one or more live keys of type <code>flt</code> and <code>ioft</code> on the target hardware (e.g. an Apple Silicon temperature or power sensor).</li>
+            <li>Read each key via <code>SMC.shared.readAllKeys()</code> and capture, per key: the raw post-reversal <code>SMCData.data</code> bytes, the current decoded <code>SMCData.value</code>, and the value <code>smc-dump</code> prints.</li>
+            <li>Obtain an independent reference value for the same sensors (e.g. <code>powermetrics</code>, <code>ioreg</code>, or a trusted third-party monitor) to compare against.</li>
+            <li>For at least one sample, compute both the plain and the <code>byteSwapped</code> interpretations of the raw bytes and record which one matches the reference.</li>
+            <li>Record the conclusion in this milestone's Implementation notes: the exact fix required for <code>flt</code> and for <code>ioft</code> (byte-swap or not), plus the concrete byte/value samples used to derive expected values for the Milestone&nbsp;2 tests.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
+
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Verification environment.</strong> MacBook Air, <code>Mac16,12</code>, Apple M4 (arm64), macOS 26.5.1 (25F80). Evidence gathered read-only by building the <code>smc-dump</code> scheme (<code>xcodebuild -project SMCKit.xcodeproj -scheme smc-dump</code>) and dumping all live keys. The dump exposes, per key, the raw <em>post-reversal</em> <code>SMCData.data</code> bytes (hex) and the value produced by the <em>current</em> (unmodified) decode path. This machine reports 993 <code>flt</code> keys and 12 <code>ioft</code> keys.</p>
+
+        <p><strong>Headline result — Finding 1 is a false positive on this hardware.</strong> The current <code>flt</code>/<code>ioft</code> decoding already yields physically-correct values, and the byte-swap compensation the review recommends (Milestone&nbsp;2) would <em>corrupt</em> them. No code change to the decode logic is warranted for <code>flt</code> or <code>ioft</code>.</p>
+
+        <p><strong>Raw byte samples — current decode vs. the proposed <code>.byteSwapped</code> fix:</strong></p>
+        <pre><code>key   type  raw (post-reversal)  current decode      proposed .byteSwapped
+----  ----  -------------------  ------------------  ---------------------
+TB0T  flt   420A6664             34.60  (temp °C)    1.6974e+22   garbage
+TCHP  flt   423BD038             46.95  (temp °C)    9.9293e-05   garbage
+TDBP  flt   42100000             36.00  (temp °C)    5.8322e-42   garbage
+Bvt7  flt   408B31A8             4.35   (voltage)   -9.8557e-15   garbage
+ceU0  flt   42C80000             100.00 (percent)    7.1839e-41   garbage
+cmDd  flt   C2C80000            -100.00              7.2018e-41   garbage
+TG0H  ioft  0000000000220000     34.00  (temp °C)    5.7043e+08   garbage
+TG0V  ioft  0000000000229999     34.60  (temp °C)    1.6888e+14   garbage
+TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code></pre>
+
+        <p><strong>Independent cross-checks (the "known-good reference"):</strong></p>
+        <ul>
+            <li><em>Physical plausibility.</em> Across ~1000 <code>flt</code> keys the current values sit in sane ranges: chip-temperature sensors (<code>TB0T</code>, <code>TCHP</code>, <code>TCMz</code>, <code>TDBP</code>, the <code>Te0x</code>/<code>Tg0x</code> families) read 33–79&nbsp;°C; battery/rail voltages ~4.35&nbsp;V; percentages 0/100; and disabled sensors report the conventional <code>-50000</code> sentinel. The <code>.byteSwapped</code> interpretation instead produces IEEE denormals (~1e-41) or absurd magnitudes (1e+22), i.e. it is self-evidently wrong.</li>
+            <li><em>Two independent decode paths agree.</em> <code>TB0T</code> (<code>flt</code>) and <code>TG0V</code> (<code>ioft</code>) — different code paths, different buffer widths — both independently decode to 34.60&nbsp;°C with the current logic. Under the proposed fix they diverge to 1.7e+22 and 1.7e+14 respectively.</li>
+        </ul>
+
+        <p><strong>Why the reviewer flagged it, and why the asymmetry is correct.</strong> The finding rests on a code-symmetry argument: the integer cases apply <code>.byteSwapped</code> after <code>SMC.m</code>'s per-value byte reversal, so <code>flt</code>/<code>ioft</code> "should" too. Empirically they must not — on this SMC the integer and float families require opposite treatment after the reversal, and the library historically shipped the <code>flt</code>/<code>ioft</code> cases without a swap. The live data confirms the original author's behavior is the correct one.</p>
+
+        <p><strong>Confirmed fix required.</strong> <code>flt</code>: none. <code>ioft</code>: none. The decode logic in <code>SMCHelper.value(for:type:)</code> is correct as-is for both types on Apple Silicon.</p>
+
+        <p><strong>Scope / caveat (Intel).</strong> Verified only on Apple Silicon (M4). The Swift decoders build integers explicitly from individual bytes and <code>.byteSwapped</code> operates on the value, so all of this is <em>host</em>-endianness-independent (holds identically whether the host is arm64 or x86_64); the byte layout being decoded is a property of the SMC wire format, not the CPU. Intel Macs use a physically different SMC, which this environment cannot exercise, but the current code has shipped against Intel hardware historically. Recommend a maintainer confirm one <code>flt</code> and one <code>ioft</code> key on an Intel Mac if one is available before closing the finding across the board.</p>
+
+        <p><strong>Consequence for Milestone&nbsp;2.</strong> Milestone&nbsp;2 as written ("apply the byte-order compensation … <code>Float32(bitPattern: uint32().byteSwapped)</code> for <code>flt</code>, byte-swapped path for <code>ioft</code>") should <em>not</em> be implemented — it would break correct decoding. It should be re-scoped to lock in the verified-correct behavior with regression tests (feeding these real post-reversal buffers through <code>value(for:type:)</code> and asserting the current values), plus a doc note explaining the intentional int-vs-float asymmetry so this is not "fixed" again. Awaiting maintainer decision.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span><p>Not applicable — this milestone produced evidence, not code. There are no source changes to review (only throwaway files in the scratchpad and this plan update). The automated fresh-context review loop is skipped for this milestone.</p></div>
+    <div class="field"><span class="label">Review comments</span>
+        <p>User accepted the hardware finding that Finding 1 is a false positive and that the recommended <code>.byteSwapped</code> fix would break correct decoding. Directed re-scoping Milestone&nbsp;2: leave the <code>flt</code>/<code>ioft</code> decode untouched and instead add regression tests that lock in the verified-correct values using the real byte samples, plus a doc note on the intentional int/float asymmetry.</p>
+    </div>
+</div>
+
+<!-- MILESTONE 2 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-completed">Completed</span>
+        <span class="sev sev-high">Finding 1 · High</span>
+        <h3>2. Lock in the verified <code>flt</code>/<code>ioft</code> decoding with regression tests and a doc note</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> <strong>Re-scoped after Milestone&nbsp;1.</strong> Milestone&nbsp;1 confirmed on real hardware that the <code>flt</code>/<code>ioft</code> decoding is already correct and that the review's recommended <code>.byteSwapped</code> compensation would corrupt it, so the original "apply the fix" goal is dropped. Instead, leave the decode logic untouched and make the verified-correct behavior permanent: add a doc note explaining the intentional int/float asymmetry, and add end-to-end <code>value(for:type:)</code> regression tests that lock in the values using the real byte samples from Milestone&nbsp;1.</p>
+
+    <div class="field">
+        <span class="label">Tasks (re-scoped)</span>
+        <ul class="checklist">
+            <li>Do <strong>not</strong> change the <code>flt</code>/<code>ioft</code> decode logic in <code>SMCHelper.value(for:type:)</code> — it is correct as verified in Milestone&nbsp;1.</li>
+            <li>Add a doc note to <code>value(for:type:)</code> in <code>SMCKit/SMCHelper.swift</code> describing the byte reversal done in <code>SMC.m</code> and stating that the <code>flt</code>/<code>ioft</code> cases deliberately do not byte-swap — the asymmetry with the integer cases is intentional and hardware-verified — so it is not "fixed" later.</li>
+            <li>Add a <code>value(for:type:)</code> regression test in <code>SMCKitTests/SMCHelperTests.swift</code> feeding post-reversal (little-endian) buffers for <code>flt</code>, <code>ioft</code>, <code>ui16</code>/<code>ui32</code>/<code>ui64</code> and <code>sp78</code>, asserting the verified-correct decoded values using the Milestone&nbsp;1 samples. Use exactly-representable float samples so <code>==</code> comparisons are safe.</li>
+            <li>Prove the guard bites: confirm the test fails if the erroneous <code>.byteSwapped</code> is applied to <code>flt</code>, then revert.</li>
+            <li>Build and run the suite via <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code>; confirm the new test passes and nothing regresses.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
+
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Re-scoped</strong> per Milestone&nbsp;1's hardware finding and the user's decision (see Milestone&nbsp;1 Review comments). The <code>flt</code>/<code>ioft</code> decode logic was left <em>unchanged</em>; the milestone instead pins the verified-correct behavior.</p>
+        <p><strong>Changes made (additive only):</strong></p>
+        <ul>
+            <li><code>SMCKit/SMCHelper.swift</code> — expanded the doc comment on <code>value(for:type:)</code> to explain <code>SMC.m</code>'s per-value byte reversal and the per-type compensation, and to state explicitly that <code>flt</code>/<code>ioft</code> deliberately do not byte-swap (intentional, hardware-verified asymmetry), pointing at the regression test by name. No code path changed.</li>
+            <li><code>SMCKitTests/SMCHelperTests.swift</code> — added <code>valueDecodesReversedMultiByteTypes</code>, a <code>value(for:type:)</code> test over real post-reversal buffers: <code>flt</code> → 36.0 (<code>TDBP</code>), 100.0 (<code>ceU0</code>), −100.0 (<code>cmDd</code>); <code>ioft</code> → 34.0 (<code>TG0H</code>), 33.0 (<code>TG0C</code>); plus <code>ui16</code>/<code>ui32</code>/<code>ui64</code> and <code>sp78</code> to close the previously-untested reversed multi-byte <code>value()</code> path (the plan Notes had flagged this gap). Exactly-representable float samples keep the <code>==</code> comparisons non-flaky.</li>
+        </ul>
+        <p><strong>TDD note.</strong> Because the correct behavior already exists, the new assertions pass against the current code. To prove they are genuine regression guards, the erroneous <code>Float32( bitPattern: self.uint32( data: data ).byteSwapped )</code> was temporarily applied to the <code>flt</code> case: the <code>flt</code> samples then decoded to denormals (5.8e-42, 7.2e-41) and the test failed with 3 issues, exactly as intended. The change was reverted and the final code restored.</p>
+        <p><strong>Verification.</strong> <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit test</code> — <strong>23/23 tests passed</strong>, including <code>value decodes reversed multi-byte buffers</code>. Working tree contains only the two intended source files (plus this plan doc). Temporary build artifacts removed. (A SourceKit "No such module 'Testing'" editor warning appears from stale indexing but does not affect the <code>xcodebuild</code> build/run, which is authoritative.)</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged. A fresh-context reviewer independently recomputed every assertion, verified the type codes, float-representability, the guard behavior, doc-comment accuracy, and confirmed the change is additive with no regressions. No Critical/High/Medium findings.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, no Critical/High/Medium findings. Two Info observations, no action required:</p>
+        <ul>
+            <li><span class="sev sev-info">Info</span> <strong>Cast relies on <code>Float32 == Float</code></strong> — <code>as? Float</code> for the <code>flt</code> case works because <code>Float</code> is a typealias for <code>Float32</code>; confirmed by the passing test. <em>Deferred (correct as written).</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>Doc-comment test reference</strong> — the doc note names the regression test in backticks rather than a DocC symbol link (a test symbol is not DocC-resolvable anyway). <em>Deferred (acceptable as written).</em></li>
+        </ul>
+    </div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- ============================ PHASE B ============================ -->
+<div class="phase">Phase B — Stability &amp; memory</div>
+
+<!-- MILESTONE 3 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-medium">Finding 2 · Medium</span>
+        <h3>3. Serialize the process-wide <code>shared</code> SMC instance</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Make concurrent use of an <code>SMC</code> instance (especially <code>shared</code>) safe by serializing all access to its mutable state and its user-client session, and document the concurrency contract.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Add a per-instance serial <code>dispatch_queue_t</code> (or use <code>@synchronized(self)</code>) in <code>SMCKit/SMC.m</code>, created in <code>-init</code>.</li>
+            <li>Serialize the bodies that touch shared mutable state: <code>-readAllKeys:</code> (lazy mutation of <code>self.keys</code>), <code>-readSMCKeyInfo:forKey:</code> (mutation of <code>self.keyInfoCache</code>), and the open/call/close sequence in <code>-callSMCFunction:input:output:</code> so concurrent calls cannot interleave on the single <code>self.connection</code>.</li>
+            <li>Avoid re-entrant deadlock: ensure a serialized public method does not synchronously call another method that acquires the same lock/queue (e.g. keep the synchronization at a single, outer boundary, or use a recursive strategy).</li>
+            <li>Document the concurrency contract in the header (<code>SMC.h</code>): state that access is serialized internally, or — at minimum — that <code>SMC</code> including <code>shared</code> must be confined appropriately.</li>
+            <li>Build and run the existing suite; confirm no regression. (Add a lightweight concurrent smoke test only if it can run without real SMC hardware; otherwise note manual verification.)</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- MILESTONE 4 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-low">Finding 5 · Low</span>
+        <span class="sev sev-info">Finding 7 · Info</span>
+        <h3>4. Fix the <code>keyInfoCache</code> leak and the <code>calloc</code> argument order</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Stop leaking the heap-allocated <code>SMCKeyInfoData</code> entries stored in <code>keyInfoCache</code>, and correct the <code>calloc</code> argument order at the same allocation site. Both touch <code>-readSMCKeyInfo:forKey:</code> around line 416, so they belong in one change.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Resolve the leak in <code>SMCKit/SMC.m</code>: either free the pointers in <code>-dealloc</code> (iterate <code>keyInfoCache</code> and <code>free(value.pointerValue)</code>), or — preferred — box the struct inline with <code>[NSValue valueWithBytes:objCType:@encode(SMCKeyInfoData)]</code> so no manual <code>free</code> is needed; update the cache read path (<code>getValue:</code>) accordingly.</li>
+            <li>Correct the argument order to <code>calloc( 1, sizeof( SMCKeyInfoData ) )</code> (only relevant if the raw-allocation approach is kept; the inline-<code>NSValue</code> approach removes the <code>calloc</code> entirely).</li>
+            <li>Verify the cache still serves hits correctly after the change.</li>
+            <li>Build and run the suite; confirm no regression.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- MILESTONE 5 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-low">Finding 6 · Low</span>
+        <h3>5. Hoist the user-client open/close out of the per-call hot path</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Avoid the hundreds of redundant <code>kSMCUserClientOpen</code>/<code>kSMCUserClientClose</code> round-trips performed during a full <code>readAllKeys()</code>, without changing observable behavior. This is hardware-dependent and must be validated on a real Mac.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Investigate whether the open/close pairing around each <code>IOConnectCallStructMethod</code> is actually required for <code>kSMCHandleYPCEvent</code>, or whether the session can be opened once around a batch. Record the finding.</li>
+            <li>If safe, open the user-client session once for the duration of a batch (e.g. around <code>-readAllKeys:</code>) rather than per call, keeping whatever pairing is correct but out of the innermost call. Coordinate with the Milestone&nbsp;3 serialization so the session lifetime stays consistent.</li>
+            <li>If open/close per call turns out to be required, keep it and instead document why, closing out the finding without a risky change.</li>
+            <li>Validate on real hardware that <code>readAllKeys()</code> still returns correct values and that <code>smc-dump</code> output is unchanged.</li>
+            <li>Build and run the suite.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses — record the open/close investigation outcome.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- ============================ PHASE C ============================ -->
+<div class="phase">Phase C — Robustness</div>
+
+<!-- MILESTONE 6 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-low">Finding 3 · Low</span>
+        <h3>6. Fix the <code>NSRegularExpression</code> range and hoist its compilation</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Make the <code>system_profiler</code> line parsing in <code>MachineDetails.swift</code> correct for non-ASCII content and stop recompiling the regex once per line.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>In <code>SMCKit/MachineDetails.swift</code>, replace <code>NSMakeRange( 0, $0.count )</code> with a UTF-16 length: <code>NSRange( location: 0, length: ( $0 as NSString ).length )</code> (or <code>$0.utf16.count</code>), so multi-unit characters are not truncated.</li>
+            <li>Compile the <code>NSRegularExpression</code> once outside the <code>compactMap</code> loop and reuse it (it is thread-safe and reusable); keep behavior identical when the pattern fails to compile.</li>
+            <li>Confirm the existing hardware-detail parsing still produces the same labels/values for typical ASCII output; add a small unit test over a representative multi-line string if it can be exercised without hardware.</li>
+            <li>Build and run the suite.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- MILESTONE 7 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-low">Finding 4 · Low</span>
+        <h3>7. Remove <code>Task</code>'s observers and make output capture robust</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Prevent <code>Task</code> from leaving <code>NotificationCenter</code> observers registered, and make its output capture insensitive to notification delivery order so a final buffered chunk cannot be missed.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Add a <code>deinit</code> to <code>SMCKit/Task.swift</code> that removes both <code>NSFileHandleDataAvailable</code> observers registered in <code>init</code>.</li>
+            <li>Make output capture reliable: prefer reading each pipe to end after exit (<code>readDataToEndOfFile()</code>) or draining the pipes on a dedicated queue, rather than mixing run-loop notifications with a blocking <code>waitUntilExit()</code> on the same thread.</li>
+            <li>Preserve the existing public surface (<code>run(executable:arguments:input:)</code>, <code>standardOutput</code>, <code>standardError</code>, <code>terminationStatus</code>) and the <code>SMCException</code> guard around launch.</li>
+            <li>Verify <code>MachineDetails</code> still reads the <code>system_profiler</code> output correctly; build and run the suite.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- ============================ PHASE D ============================ -->
+<div class="phase">Phase D — Minor correctness &amp; style</div>
+
+<!-- MILESTONE 8 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-info">Finding 9 · Info</span>
+        <span class="sev sev-info">Finding 10 · Info</span>
+        <h3>8. Harden <code>flag</code> decoding and <code>fourCC</code> NUL handling</h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Two small defensive correctness improvements in <code>SMCHelper.swift</code>: treat any non-zero byte as a <code>true</code> flag, and avoid embedding raw <code>NUL</code>/control characters in <code>fourCC</code> output.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>Change the <code>flag</code> case to <code>self.uint8( data: data ) != 0</code> so bytes other than exactly <code>1</code> (e.g. <code>2</code>, <code>0xFF</code>) map to <code>true</code>, matching boolean intent.</li>
+            <li>In <code>fourCC(value:)</code>, map non-printable bytes to a placeholder rather than emitting raw control characters (mirroring what <code>printableString</code> already does), so a <code>0x00</code> byte does not embed a <code>NUL</code> in the string. Confirm the normal printable-ASCII output (e.g. <code>"#KEY"</code>, <code>"ui32"</code>) is unchanged.</li>
+            <li>Update/extend the <code>SMCHelperTests</code> cases for <code>fourCC</code> and the <code>flag</code> path to cover the new behavior.</li>
+            <li>Build and run the suite.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<!-- MILESTONE 9 -->
+<div class="milestone">
+    <div class="m-head">
+        <span class="capsule st-notstarted">Not started</span>
+        <span class="sev sev-info">Finding 8 · Info</span>
+        <h3>9. Use <code>NO</code> for consistency in <code>-close</code></h3>
+    </div>
+    <p class="kv"><strong>Goal:</strong> Align the failure-path return value of <code>-close</code> with the Objective-C <code>YES</code>/<code>NO</code> convention used everywhere else in <code>SMC.m</code>.</p>
+
+    <div class="field">
+        <span class="label">Tasks</span>
+        <ul class="checklist">
+            <li>In <code>SMCKit/SMC.m</code> (around line 331), change the lowercase <code>false</code> return in <code>-close</code> to <code>NO</code>. Same value, consistent spelling.</li>
+            <li>Build; confirm no behavioral change.</li>
+        </ul>
+    </div>
+
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+
+    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
+    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
+</div>
+
+<h2>Appendix — Findings-to-milestones map</h2>
+<pre><code>finding                                             severity  milestone  phase
+--------------------------------------------------  --------  ---------  -----
+1  flt/ioft wrong byte order                        High      1 + 2      A
+2  shared instance not thread-safe                  Medium    3          B
+5  keyInfoCache leaks heap entries                  Low       4          B
+7  calloc arguments in wrong order                  Info      4          B
+6  user-client opened/closed per call               Low       5          B
+3  regex range uses String.count, recompiled        Low       6          C
+4  Task observers never removed / output race       Low       7          C
+9  flag decoding treats only 1 as true              Info      8          D
+10 fourCC can embed a NUL                           Info      8          D
+8  -close returns lowercase false                   Info      9          D</code></pre>
+<p class="kv" style="margin-top:14px">
+    Ordering rationale: correctness first (finding 1, gated by hardware verification), then the
+    stability and memory items that share <code>SMC.m</code> and the connection lifecycle (3 → 4 → 5,
+    kept in that order so the serialization from Milestone&nbsp;3 is in place before the session-lifetime
+    change in Milestone&nbsp;5), then the independent robustness fixes in the Swift process/parse layer,
+    and finally the low-risk cosmetic and defensive tidy-ups. Each milestone is intended to be a single
+    reviewable commit.
+</p>
+
+</div>
+</body>
+</html>

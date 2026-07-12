@@ -54,6 +54,20 @@ public class SMCHelper: NSObject
 
     /// Decodes raw SMC bytes into a native value according to their type code.
     ///
+    /// The buffer handed in here has already had its bytes reversed by
+    /// `SMC.m -readSMCKey:buffer:maxSize:keyInfo:` (from the SMC's big-endian
+    /// order into little-endian), so the multi-byte types need to undo that
+    /// reversal. The integer cases do so with `.byteSwapped`; `sp78`
+    /// compensates through its byte indexing.
+    ///
+    /// The `flt` and `ioft` cases deliberately do **not** apply a byte swap.
+    /// This asymmetry with the integer cases is intentional and has been
+    /// verified against live values on real hardware (Apple Silicon): the
+    /// current decoding yields the correct floating-point results, whereas
+    /// adding a `.byteSwapped` compensation turns them into IEEE denormals or
+    /// absurd magnitudes. Do not "align" `flt`/`ioft` with the integer cases —
+    /// see the regression test `valueDecodesReversedMultiByteTypes`.
+    ///
     /// - Parameters:
     ///   - data: The raw value bytes.
     ///   - type: The SMC type code identifying how to interpret the bytes.

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMCKit — Code Review</title>
+<style>
+    :root {
+        --bg:        #0d1117;
+        --bg-alt:    #161b22;
+        --bg-code:   #1c2128;
+        --border:    #30363d;
+        --text:      #e6edf3;
+        --text-dim:  #9da7b3;
+        --accent:    #58a6ff;
+        --mono:      ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+    * { box-sizing: border-box; }
+    body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+        font-size: 16px;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 40px 24px 80px; }
+    h1 { font-size: 30px; margin: 0 0 4px; letter-spacing: -0.5px; }
+    h2 {
+        font-size: 22px;
+        margin: 48px 0 16px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--border);
+    }
+    h3 { font-size: 18px; margin: 0 0 6px; }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code {
+        font-family: var(--mono);
+        background: var(--bg-code);
+        padding: 1px 6px;
+        border-radius: 5px;
+        font-size: 0.88em;
+        color: #d2a8ff;
+    }
+    pre {
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        padding: 14px 16px;
+        overflow-x: auto;
+        font-family: var(--mono);
+        font-size: 13px;
+        line-height: 1.5;
+    }
+    pre code { background: none; padding: 0; color: var(--text); }
+    .meta { color: var(--text-dim); font-size: 14px; margin-bottom: 24px; }
+    .meta strong { color: var(--text); }
+    .summary {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-radius: 10px;
+        padding: 18px 22px;
+    }
+    .capsule {
+        display: inline-block;
+        padding: 2px 11px;
+        border-radius: 999px;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.4px;
+        text-transform: uppercase;
+        color: #fff;
+        vertical-align: middle;
+    }
+    .sev-critical { background: #d1242f; }
+    .sev-high     { background: #e0752d; }
+    .sev-medium   { background: #c9a227; color: #1a1400; }
+    .sev-low      { background: #2f6feb; }
+    .sev-info     { background: #6e7681; }
+    .counts { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; }
+    .counts .capsule { font-size: 12px; }
+    .finding {
+        background: var(--bg-alt);
+        border: 1px solid var(--border);
+        border-left-width: 4px;
+        border-radius: 10px;
+        padding: 18px 22px;
+        margin: 18px 0;
+    }
+    .finding.b-high     { border-left-color: #e0752d; }
+    .finding.b-medium   { border-left-color: #c9a227; }
+    .finding.b-low      { border-left-color: #2f6feb; }
+    .finding.b-info     { border-left-color: #6e7681; }
+    .finding-head { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
+    .finding-head h3 { flex: 1 1 auto; min-width: 240px; }
+    .tags { font-size: 13px; color: var(--text-dim); margin: 2px 0 12px; }
+    .tags .k { color: var(--text); font-weight: 600; }
+    .loc { font-family: var(--mono); font-size: 12.5px; color: var(--accent); }
+    .finding p { margin: 10px 0; }
+    .label { color: var(--text-dim); font-weight: 700; text-transform: uppercase; font-size: 12px; letter-spacing: 0.5px; }
+    ul { padding-left: 22px; }
+    li { margin: 4px 0; }
+    .rec { border-top: 1px dashed var(--border); margin-top: 14px; padding-top: 12px; }
+    .strength { border-left-color: #2ea043 !important; }
+    hr { border: none; border-top: 1px solid var(--border); margin: 40px 0; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<h1>SMCKit — Code Review</h1>
+<div class="meta">
+    <strong>Generated:</strong> 2026-07-12 &nbsp;·&nbsp;
+    <strong>Scope:</strong> Whole repository (project sources under <code>SMCKit/</code>, <code>smc-dump/</code>, <code>SMCKitTests/</code>). The vendored <code>Submodules/xcconfig</code> submodule was treated as an external dependency and not reviewed in depth.
+</div>
+
+<div class="summary">
+    <p style="margin-top:0">
+        SMCKit is a small, focused macOS framework that reads keys from the System Management Controller and decodes their raw bytes into native values, plus a <code>smc-dump</code> command-line tool. The code is clean, well organized (one type per file), thoroughly documented with HeaderDoc/SwiftDoc, and now covered by Swift Testing unit tests. It builds successfully (<code>SMCKit</code> scheme, Debug). The overall quality is good.
+    </p>
+    <p>
+        The most important issue is a <strong>value-decoding correctness bug</strong>: the <code>flt</code> and <code>ioft</code> floating-point SMC types are decoded from the wrong byte order, so their <code>value</code> comes out byte-swapped and meaningless on real hardware — while the neighbouring integer and <code>sp78</code> types are handled correctly. This matters because <code>flt</code>/<code>ioft</code> are common for temperature and power sensors on Apple Silicon, and the unit tests exercise the standalone helpers but never the <code>value(for:type:)</code> path for these types, so the bug is invisible to the suite. Beyond that, there is a thread-safety gap on the process-wide <code>shared</code> instance and a handful of low-severity robustness, leak, and style items.
+    </p>
+    <div class="counts">
+        <span class="capsule sev-critical">Critical: 0</span>
+        <span class="capsule sev-high">High: 1</span>
+        <span class="capsule sev-medium">Medium: 1</span>
+        <span class="capsule sev-low">Low: 4</span>
+        <span class="capsule sev-info">Info: 4</span>
+    </div>
+</div>
+
+<h2>Notes</h2>
+<ul>
+    <li><span class="label" style="text-transform:none;font-weight:600">Byte-order model.</span> <code>SMC.m -readSMCKey:buffer:maxSize:keyInfo:</code> (lines 528–538) reverses every value's bytes from the SMC's big-endian ordering into little-endian before handing them to Swift (with <code>kSMCKeyACID</code> as the sole exception). Understanding this reversal is central to judging the decoders in <code>SMCHelper</code>, and it is the crux of finding&nbsp;1.</li>
+    <li><span class="label" style="text-transform:none;font-weight:600">Standalone helpers vs. the <code>value()</code> path.</span> The public numeric helpers (<code>uint16</code>, <code>float32</code>, <code>ioFloat</code>, …) are documented and tested as <em>big-endian</em> decoders and are internally consistent. The bug is specifically in how <code>value(for:type:)</code> combines them with the reversed buffer, which the tests do not cover.</li>
+    <li><span class="label" style="text-transform:none;font-weight:600">Build.</span> Verified with <code>xcodebuild -project SMCKit.xcodeproj -scheme SMCKit -configuration Debug build</code> → <code>BUILD SUCCEEDED</code>. The no-argument call <code>SMC.shared.readAllKeys()</code> in <code>SMCDump.swift</code> compiles because Swift supplies an implicit <code>nil</code> default for the trailing nullable block parameter.</li>
+</ul>
+
+<h2>Findings</h2>
+
+<!-- FINDING 1 -->
+<div class="finding b-high">
+    <div class="finding-head">
+        <span class="capsule sev-high">High</span>
+        <h3>1. <code>flt</code> and <code>ioft</code> values are decoded with the wrong byte order</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> correctness / stability &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMCHelper.swift:78–80</span>, interacting with <span class="loc">SMCKit/SMC.m:528–538</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>SMC.m</code> reverses each value's bytes into little-endian before they reach Swift. Accordingly, the integer cases in <code>value(for:type:)</code> compensate with <code>.byteSwapped</code>:
+    </p>
+    <pre><code>case "ui16": return self.uint16( data: data ).byteSwapped   // undoes the reversal → correct
+case "ui32": return self.uint32( data: data ).byteSwapped
+...
+case "flt ": return self.float32( data: data )              // NO compensation
+case "ioft": return self.ioFloat( data: data )              // NO compensation
+case "sp78": return self.sp78(    data: data )              // handled internally (correct)</code></pre>
+    <p>
+        <code>float32(data:)</code> and <code>ioFloat(data:)</code> both read the buffer <em>big-endian</em> (via <code>uint32</code>/<code>uint64</code>, which assemble MSB-first). Given a buffer that <code>SMC.m</code> has already reversed to little-endian, they therefore operate on the byte-swapped bit pattern and are never corrected. Worked example for a temperature of <code>1.0</code> (<code>flt</code>):
+    </p>
+    <pre><code>SMC big-endian bytes : 3F 80 00 00        (IEEE-754 1.0f)
+after SMC.m reversal : 00 00 80 3F        (little-endian, stored in SMCData.data)
+float32(data:)       : Float(bitPattern: 0x0000803F)  ≈ 4.6e-41   ✗ (should be 1.0)
+correct would be     : Float(bitPattern: 0x0000803F.byteSwapped = 0x3F800000) = 1.0</code></pre>
+    <p>
+        The same applies to <code>ioft</code>: <code>ioFloat</code> computes <code>uint64(data) &gt;&gt; 16</code> on the reversed buffer, yielding the byte-swapped 64-bit value rather than the true one. By contrast <code>sp78</code> is correct because it indexes <code>data[1]</code>/<code>data[0]</code> in a way that already accounts for the reversal (and its test feeds the post-reversal layout <code>[0x80,0x14] → 20.5</code>).
+    </p>
+    <p>
+        Impact: for every <code>flt</code>- and <code>ioft</code>-typed key — common on Apple Silicon for temperature, fan and power sensors — the decoded <code>SMCData.value</code> (and the <code>smc-dump</code> value column, via <code>SMCDump.valueDescription</code>) is garbage. The raw <code>data</code> bytes remain intact, so only the decoded value is affected. The unit tests miss this because <code>SMCHelperTests</code> only tests the standalone big-endian helpers, and the <code>value()</code> tests cover only byte-order-independent types (<code>ui8</code>, <code>si8</code>, <code>flag</code>, <code>ch8*</code>).
+    </p>
+
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Compensate for the reversal in the <code>flt</code> and <code>ioft</code> cases exactly as the integer cases do. For example, byte-swap the assembled bit pattern before reinterpreting:
+    </p>
+    <pre><code>case "flt ": return Float32( bitPattern: self.uint32( data: data ).byteSwapped )
+case "ioft": return self.ioFloat( data: Data( data.reversed() ) )   // or add a byteSwapped uint64 path</code></pre>
+    <p>
+        Then add <code>value(for:type:)</code> tests that feed post-reversal (little-endian) buffers for <code>flt</code>, <code>ioft</code>, <code>sp78</code>, <code>ui16/ui32/ui64</code> and assert the fully decoded values, so the end-to-end decode path — not just the helpers — is covered. Confirm the intended byte order against a known-good reference read on hardware.
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 2 -->
+<div class="finding b-medium">
+    <div class="finding-head">
+        <span class="capsule sev-medium">Medium</span>
+        <h3>2. The process-wide <code>shared</code> instance is not thread-safe</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> stability / crash &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMC.m:218–269, 376–426</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>SMC</code> exposes a <code>shared</code> singleton intended for reuse across a process, but its mutable state is accessed without synchronization. <code>-readAllKeys:</code> lazily mutates <code>self.keys</code> (an <code>NSMutableArray</code>) on first use, and <code>-readSMCKeyInfo:forKey:</code> mutates <code>self.keyInfoCache</code> (an <code>NSMutableDictionary</code>). Both <code>NSMutableArray</code> and <code>NSMutableDictionary</code> are documented as unsafe for concurrent mutation. In addition, <code>-callSMCFunction:</code> opens, calls and closes the shared user-client session on the single <code>self.connection</code>; concurrent calls interleave open/close on the same connection.
+    </p>
+    <p>
+        A framework singleton is a natural thing for a client to touch from several queues (e.g. a menu-bar refresh timer plus a UI action). Two concurrent <code>readAllKeys()</code> / <code>SMCDump.produce()</code> calls can corrupt the collections or the connection state and crash.
+    </p>
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Serialize access — e.g. wrap the body of <code>readAllKeys:</code>, <code>readSMCKeyInfo:forKey:</code> and the <code>callSMCFunction:</code> open/call/close sequence in a per-instance serial <code>dispatch_queue_t</code> or <code>@synchronized(self)</code> — and document the concurrency contract. At minimum, state in the header that <code>SMC</code> (including <code>shared</code>) is not thread-safe and must be confined to one queue.
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 3 -->
+<div class="finding b-low">
+    <div class="finding-head">
+        <span class="capsule sev-low">Low</span>
+        <h3>3. <code>NSRegularExpression</code> range uses <code>String.count</code> instead of the UTF-16 length</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> correctness / performance &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/MachineDetails.swift:118, 124</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>regex.matches( in: $0, range: NSMakeRange( 0, $0.count ) )</code> passes the Swift <em>grapheme</em> count as an <code>NSRange</code> length, but <code>NSRegularExpression</code> works in UTF-16 units. Because grapheme count is always ≤ UTF-16 length, this never over-runs (no crash), but for any line containing multi-unit characters (accents, emoji) the search would silently stop short and miss trailing content. It happens to be harmless today only because <code>system_profiler SPHardwareDataType</code> output is ASCII. Separately, the constant regex pattern is recompiled inside <code>compactMap</code> once per output line rather than once.
+    </p>
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Use the UTF-16 length: <code>NSRange( location: 0, length: ( $0 as NSString ).length )</code> (or <code>$0.utf16.count</code>). Hoist the <code>NSRegularExpression</code> out of the loop and compile it once (it is thread-safe and reusable).
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 4 -->
+<div class="finding b-low">
+    <div class="finding-head">
+        <span class="capsule sev-low">Low</span>
+        <h3>4. <code>Task</code> never removes its notification observers and may read output before it is fully delivered</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> stability / reliability &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/Task.swift:98–130</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>Task</code> registers two <code>NSFileHandleDataAvailable</code> observers in its initializer but has no <code>deinit</code> that calls <code>removeObserver</code>. <code>NotificationCenter</code> holds observers without owning them; relying on the pipes deallocating together with the task to stop notifications is fragile. The capture design is also delivery-order sensitive: output is collected via <code>availableData</code> callbacks re-armed with <code>waitForDataInBackgroundAndNotify()</code>, while <code>run(input:)</code> blocks in <code>waitUntilExit()</code> and then reads <code>standardOutput</code> immediately — any final buffered chunk not yet delivered as a notification can be missed. For the small, fixed <code>system_profiler</code> header this works in practice, but it is brittle if reused for larger output.
+    </p>
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Add a <code>deinit</code> that removes both observers. For robustness, prefer reading to end after exit (<code>readDataToEndOfFile()</code>) or draining the pipes on a dedicated queue, rather than mixing run-loop notifications with a blocking <code>waitUntilExit()</code> on the same thread.
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 5 -->
+<div class="finding b-low">
+    <div class="finding-head">
+        <span class="capsule sev-low">Low</span>
+        <h3>5. <code>keyInfoCache</code> leaks its heap-allocated entries</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> memory / leak &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMC.m:416–422</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        Each key's metadata is stored as a <code>calloc</code>'d <code>SMCKeyInfoData</code> wrapped in <code>[NSValue valueWithPointer:]</code>. Those raw allocations are never <code>free</code>d — not on cache eviction (there is none) and not in <code>-dealloc</code>. For the <code>shared</code> singleton this is a bounded one-time cost, but any client that creates and releases its own <code>SMC</code> instances leaks one allocation per distinct key each time.
+    </p>
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Free the pointers in <code>-dealloc</code> (iterate <code>keyInfoCache</code> and <code>free(value.pointerValue)</code>), or avoid raw allocation entirely by boxing the struct in <code>[NSValue valueWithBytes:objCType:@encode(SMCKeyInfoData)]</code>, which stores the value inline and requires no manual free.
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 6 -->
+<div class="finding b-low">
+    <div class="finding-head">
+        <span class="capsule sev-low">Low</span>
+        <h3>6. The SMC user-client session is opened and closed around every single call</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> performance &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMC.m:349–365</span></div>
+
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>-callSMCFunction:input:output:</code> issues <code>kSMCUserClientOpen</code> before, and <code>kSMCUserClientClose</code> after, each structured call. A full <code>readAllKeys()</code> performs at least two such calls per key (key-info + read) across hundreds of keys, so the enumeration does many hundreds of redundant open/close round-trips into the kernel. Functionally correct, but avoidable overhead on a hot path.
+    </p>
+    <div class="rec">
+    <p><span class="label">Recommendation</span></p>
+    <p>
+        Open the user-client session once around a batch (e.g. for the duration of <code>readAllKeys:</code>) rather than per call, or verify whether the open/close is required at all for <code>kSMCHandleYPCEvent</code>. Keep whatever pairing is correct, but hoist it out of the innermost call.
+    </p>
+    </div>
+</div>
+
+<!-- FINDING 7 -->
+<div class="finding b-info">
+    <div class="finding-head">
+        <span class="capsule sev-info">Info</span>
+        <h3>7. <code>calloc</code> arguments are in the wrong order</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> style / correctness &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMC.m:416</span></div>
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>calloc( sizeof( SMCKeyInfoData ), 1 )</code> passes the element size as the <em>count</em> and <code>1</code> as the <em>size</em>. The total byte count is identical so it is harmless, but the intent is reversed and reads incorrectly.
+    </p>
+    <div class="rec"><p><span class="label">Recommendation</span></p><p>Write <code>calloc( 1, sizeof( SMCKeyInfoData ) )</code> to match the <code>calloc(count, size)</code> signature.</p></div>
+</div>
+
+<!-- FINDING 8 -->
+<div class="finding b-info">
+    <div class="finding-head">
+        <span class="capsule sev-info">Info</span>
+        <h3>8. <code>-close</code> returns lowercase <code>false</code> amid <code>YES</code>/<code>NO</code></h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> style &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMC.m:331</span></div>
+    <p><span class="label">Description</span></p>
+    <p>
+        The method returns <code>false</code> on the failure path while every other return in the file uses the Objective-C <code>YES</code>/<code>NO</code> spelling. Same value, inconsistent convention.
+    </p>
+    <div class="rec"><p><span class="label">Recommendation</span></p><p>Use <code>NO</code> for consistency.</p></div>
+</div>
+
+<!-- FINDING 9 -->
+<div class="finding b-info">
+    <div class="finding-head">
+        <span class="capsule sev-info">Info</span>
+        <h3>9. <code>flag</code> decoding treats only exactly <code>1</code> as <code>true</code></h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> correctness (minor) &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMCHelper.swift:82</span></div>
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>case "flag": return self.uint8( data: data ) == 1 ? true : false</code> maps any non-<code>1</code> byte (including <code>2</code>, <code>0xFF</code>) to <code>false</code>. SMC flags are conventionally 0/1 so this is fine in practice, but a defensive <code>!= 0</code> better matches boolean intent.
+    </p>
+    <div class="rec"><p><span class="label">Recommendation</span></p><p>Consider <code>self.uint8( data: data ) != 0</code>.</p></div>
+</div>
+
+<!-- FINDING 10 -->
+<div class="finding b-info">
+    <div class="finding-head">
+        <span class="capsule sev-info">Info</span>
+        <h3>10. <code>fourCC</code> can embed a NUL for zero bytes</h3>
+    </div>
+    <div class="tags"><span class="k">Category:</span> robustness (minor) &nbsp;·&nbsp; <span class="k">Location:</span> <span class="loc">SMCKit/SMCHelper.swift:44–53</span></div>
+    <p><span class="label">Description</span></p>
+    <p>
+        <code>String( format: "%c%c%c%c", … )</code> renders each byte as a character; a zero byte produces an embedded <code>NUL</code> in the resulting <code>String</code>. Key and type codes are normally printable ASCII, so this rarely bites, but a key/type containing a <code>0x00</code> byte yields a string with an embedded null that can confuse downstream display, sorting, or comparison.
+    </p>
+    <div class="rec"><p><span class="label">Recommendation</span></p><p>If robustness for arbitrary codes matters, map non-printable bytes to a placeholder (as <code>printableString</code> already does) rather than emitting raw control characters.</p></div>
+</div>
+
+<h2>Strengths</h2>
+<div class="finding strength" style="border-left-color:#2ea043">
+<ul style="margin:0">
+    <li>Clear, consistent structure: one type per file, sensible Objective-C/Swift split, and a dedicated <code>SMCException</code> bridge so Swift can recover from Objective-C exceptions thrown by <code>Process</code>.</li>
+    <li>Thorough, accurate documentation throughout (HeaderDoc for the Objective-C surface, SwiftDoc for the Swift surface), including private members.</li>
+    <li>Defensive size checks in every integer/float decoder (<code>guard data.count == N else { return 0 }</code>) prevent out-of-bounds reads on malformed buffers, and <code>readSMCKey:buffer:maxSize:</code> guards the destination buffer against oversized values.</li>
+    <li>Good use of value semantics and immutability (<code>let</code>, <code>private(set)</code>), no force-unwraps, and functional iteration (<code>map</code>/<code>reduce</code>/<code>forEach</code>) consistent with the project's conventions.</li>
+    <li>Newly added Swift Testing coverage for the decoding helpers and <code>SMCData</code> — a solid base to extend to the end-to-end <code>value()</code> path (see finding 1).</li>
+</ul>
+</div>
+
+<h2>Appendix — Byte-order decode matrix</h2>
+<p>Behaviour of <code>value(for:type:)</code> given the little-endian buffer produced by <code>SMC.m</code>'s reversal:</p>
+<pre><code>type    helper called            reversal compensated?   result
+------  -----------------------  ----------------------  --------
+ui8/si8 uint8/int8               n/a (single byte)        correct
+ui16…64 uintN.byteSwapped        yes (.byteSwapped)       correct
+si16…64 intN.byteSwapped         yes (.byteSwapped)       correct
+sp78    sp78 (data[1],data[0])   yes (internal indexing)  correct
+flag    uint8 == 1               n/a (single byte)        correct
+ch8*    string (reverses again)  yes (double reversal)    correct
+flt     float32                  NO                       WRONG  ← finding 1
+ioft    ioFloat                  NO                       WRONG  ← finding 1</code></pre>
+
+</div>
+</body>
+</html>
