@@ -427,7 +427,7 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
 <!-- MILESTONE 6 -->
 <div class="milestone">
     <div class="m-head">
-        <span class="capsule st-notstarted">Not started</span>
+        <span class="capsule st-completed">Completed</span>
         <span class="sev sev-low">Finding 3 · Low</span>
         <h3>6. Fix the <code>NSRegularExpression</code> range and hoist its compilation</h3>
     </div>
@@ -443,10 +443,27 @@ TR0Z  ioft  000000000033D1EC     51.82  (temp °C)    2.6038e+14   garbage</code
         </ul>
     </div>
 
-    <p class="kv"><strong>Status:</strong> <span class="capsule st-notstarted">Not started</span> &nbsp; · &nbsp; <strong>Completed:</strong> <span class="placeholder">—</span></p>
+    <p class="kv"><strong>Status:</strong> <span class="capsule st-completed">Completed</span> &nbsp; · &nbsp; <strong>Completed:</strong> 2026-07-12</p>
 
-    <div class="field note"><span class="label">Implementation notes</span><p class="placeholder">To be filled in as work progresses.</p></div>
-    <div class="field"><span class="label">Automated review</span><p class="placeholder">—</p></div>
+    <div class="field note"><span class="label">Implementation notes</span>
+        <p><strong>Changes in <code>SMCKit/MachineDetails.swift</code>.</strong></p>
+        <ul>
+            <li><strong>Range fix:</strong> replaced <code>NSMakeRange( 0, $0.count )</code> (grapheme/<code>Character</code> count) with <code>NSRange( location: 0, length: string.length )</code> on the line cast to <code>NSString</code> — the UTF-16 code-unit length that <code>NSRegularExpression</code> expects. Both <code>substring(with:)</code> calls use that same <code>NSString</code> instance so the ranges stay consistent.</li>
+            <li><strong>Compile once:</strong> the <code>NSRegularExpression</code> is now built a single time before the loop and reused (it is immutable/thread-safe/reusable), instead of being recompiled per line. If the (fixed literal) pattern ever failed to compile, the function returns <code>nil</code> — equivalent to the old per-line behavior (every line <code>nil</code> → empty → <code>nil</code>).</li>
+            <li><strong>Testable extraction:</strong> pulled the parsing into <code>internal static func parseHardwareDetails( _ output: String ) -> [ ( String, String ) ]?</code>. <code>hardwareDetails</code> keeps its two I/O guards (run <code>system_profiler</code>, decode UTF-8) and delegates to it. <code>internal</code> keeps it accessible to <code>@testable</code> tests without widening the (already <code>internal</code>) class surface — the pattern string, the <code>numberOfRanges == 3</code> guard, the <code>validHardwareDetailsKeys</code> filter, and the <code>isEmpty ? nil</code> return are all unchanged.</li>
+        </ul>
+        <p><strong>Test:</strong> new <code>SMCKitTests/MachineDetailsTests.swift</code> (<code>@Suite "MachineDetails"</code>), hardware-independent — feeds a representative multi-line <code>system_profiler</code> sample to <code>parseHardwareDetails</code>. Covers (a) only-wanted-keys filtering with section headers/blank lines and an unwanted <code>Serial Number</code> key dropped, (b) the multi-unit regression (a <code>Chip</code> value with four rockets, each 2 UTF-16 units), and (c) <code>nil</code> for empty / no-wanted-key input. Registered in <code>SMCKit.xcodeproj</code> (fresh IDs <code>0013</code>/<code>0014</code>, no SwiftPM manifest to sync).</p>
+        <p><strong>TDD red→green.</strong> With the fix in place the suite is green. Temporarily reverting the range back to <code>$0.count</code> made the multi-unit test fail with <code>details["Chip"] → "Apple M4 🚀🚀"</code> (last two rockets dropped) while the ASCII-only tests still passed — confirming the test specifically guards the range bug — then the fix was restored.</p>
+        <p><strong>Verification.</strong> Full suite <code>xcodebuild -scheme SMCKit test</code> — <strong>27/27 passed</strong> (24 + 3 new). <code>smc-dump</code>'s machine header still renders every real hardware detail correctly end-to-end (Model Name/Identifier/Number, Chip, Cores, Memory), confirming the extraction preserved behavior. Clean build under <code>-Wdocumentation -Werror</code>; temporary artifacts removed.</p>
+        <p><strong>Automated review loop.</strong> 1 round, converged. A fresh-context reviewer independently reproduced the range truncation, confirmed byte-identical behavior for ASCII output, validated the compile-once/reuse safety, the <code>internal</code> visibility, the test robustness, and the pbxproj registration (<code>plutil -lint</code> OK). No Critical/High/Medium/Low findings.</p>
+    </div>
+    <div class="field"><span class="label">Automated review</span>
+        <p>Round 1 (fresh-context reviewer) — converged, no Critical/High/Medium/Low findings. Two Info observations, no action required:</p>
+        <ul>
+            <li><span class="sev sev-info">Info</span> <strong>Doc phrasing</strong> — <code>hardwareDetails</code>' doc still describes the extraction/filtering now performed by the delegate; still accurate as observable behavior. <em>Left as-is.</em></li>
+            <li><span class="sev sev-info">Info</span> <strong>Pre-existing edge case (out of scope)</strong> — the label group <code>([^:]+)</code> would keep a trailing space for a hypothetical <code>Foo : bar</code> input; identical to the pre-change code and does not occur in <code>system_profiler</code> output. <em>Noted only.</em></li>
+        </ul>
+    </div>
     <div class="field"><span class="label">Review comments</span><p class="placeholder">—</p></div>
 </div>
 

@@ -109,19 +109,37 @@ internal class MachineDetails
             return nil
         }
 
+        return self.parseHardwareDetails( output )
+    }
+
+    /// Parses `system_profiler` hardware output into label/value pairs.
+    ///
+    /// Each `label: value` line is matched with a single, reused regular
+    /// expression, and only the keys listed in ``validHardwareDetailsKeys`` are
+    /// kept. The match range spans the whole line in UTF-16 code units, so lines
+    /// containing multi-unit characters (emoji, combining marks, ...) are not
+    /// truncated.
+    ///
+    /// - Parameter output: The raw text emitted by `system_profiler`.
+    /// - Returns: The matching label/value pairs, or `nil` if the pattern cannot
+    ///   be compiled or none of the wanted keys are present.
+    internal static func parseHardwareDetails( _ output: String ) -> [ ( String, String ) ]?
+    {
+        guard let regex = try? NSRegularExpression( pattern: "\\s*([^:]+):\\s*(.+)" )
+        else
+        {
+            return nil
+        }
+
         let details: [ ( String, String ) ] = output.split( separator: "\n" ).map
         {
             String( $0 )
         }
         .compactMap
         {
-            guard let regex = try? NSRegularExpression( pattern: "\\s*([^:]+):\\s*(.+)" )
-            else
-            {
-                return nil
-            }
-
-            let matches = regex.matches( in: $0, range: NSMakeRange( 0, $0.count ) )
+            let string  = $0 as NSString
+            let range   = NSRange( location: 0, length: string.length )
+            let matches = regex.matches( in: $0, range: range )
 
             guard let match = matches.first, match.numberOfRanges == 3
             else
@@ -129,11 +147,8 @@ internal class MachineDetails
                 return nil
             }
 
-            let r1 = match.range( at: 1 )
-            let r2 = match.range( at: 2 )
-
-            let label = ( $0 as NSString ).substring( with: r1 )
-            let value = ( $0 as NSString ).substring( with: r2 )
+            let label = string.substring( with: match.range( at: 1 ) )
+            let value = string.substring( with: match.range( at: 2 ) )
 
             return ( label, value )
         }
