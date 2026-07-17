@@ -29,10 +29,10 @@
 		05BD7475299408E200CF4FD7 /* SMCHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05BD7473299408E200CF4FD7 /* SMCHelper.swift */; };
 		0FCE0000000000000000000E /* SMCHelperTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE0000000000000000000C /* SMCHelperTests.swift */; };
 		0FCE0000000000000000000F /* SMCDataTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE0000000000000000000D /* SMCDataTests.swift */; };
+		0FCE00000000000000000010 /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD7282299275AB00CF4FD7 /* SMCKit.framework */; };
 		0FCE00000000000000000012 /* SMCTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000011 /* SMCTests.swift */; };
 		0FCE00000000000000000014 /* MachineDetailsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000013 /* MachineDetailsTests.swift */; };
 		0FCE00000000000000000016 /* TaskTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0FCE00000000000000000015 /* TaskTests.swift */; };
-		0FCE00000000000000000010 /* SMCKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 05BD7282299275AB00CF4FD7 /* SMCKit.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -475,7 +475,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1420;
-				LastUpgradeCheck = 1420;
+				LastUpgradeCheck = 2650;
 				TargetAttributes = {
 					05BD7281299275AB00CF4FD7 = {
 						CreatedOnToolsVersion = 14.2;
